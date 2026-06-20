@@ -2,67 +2,105 @@
 ## Architectural & Functional Specification
 
 ### 1. Executive Summary
-This document outlines the architecture and operational flow for a scheduling optimization engine tailored to a dance studio environment (pilot scale: ~500 students). The system frames scheduling as a Constraint Satisfaction Problem (CSP) and relies on Google OR-Tools (specifically the CP-SAT solver) implemented in Python. 
 
-The core design philosophy utilizes an "Orthogonal State and Behavior" paradigm. The solver (behavior) is strictly decoupled from the studio data and constraints (state).
+This document outlines the architecture and operational flow for a scheduling optimization engine tailored to a dance studio environment. The system models scheduling as a Resource-Constrained Project Scheduling Problem (RCPSP) and relies on Google OR-Tools (specifically the CP-SAT solver) implemented in Python.
+
+The core design philosophy is "Schedule First, Register Later." The solver optimizes the curriculum layout and teacher utilization based on spatial and chronological constraints. Student registration occurs downstream of this system's output.
 
 ### 2. The Mathematical Model
-The problem is modeled by mapping events to resources over discrete time intervals.
 
-* **The Decision Variable (Dynamic State):**
-    The solver manipulates a multidimensional boolean tensor.
-    Let `x[c, t, r, p]` be a boolean variable that equals `1` if Class `c` is taught by Teacher `t` in Room `r` at Time Period `p`, and `0` otherwise.
+The problem is modeled using discrete time periods (epochs) mapped to a unified integer grid (e.g., one epoch = 10 minutes).
+
+* **The Decision Variables:**
+Instead of a combinatorial boolean tensor, the solver manipulates three primary variables per class:
+* `IntervalVar`: Defines the specific time block the class occupies, inherently linking the start time, fixed duration, and end time.
+* `RoomVar`: An integer variable representing the assigned room index.
+* `TeacherVar`: An integer variable representing the assigned teacher index.
+
 * **The Solver's Goal:**
-    Find a valid combination of 1s and 0s that satisfies all Hard Constraints, while minimizing the penalty score of all Soft Constraints.
+Find a valid assignment of intervals, rooms, and teachers that satisfies all Hard Constraints, while minimizing the total penalty score of the Objective Function (Soft Constraints).
 
-### 3. Data Dictionary (Static Attributes)
-Entities in this system act as pure IDs mapped to immutable data components. This data must be ingested via strictly formatted CSVs or an API connection to existing studio software.
+### 3. Data Dictionary (Static Inputs)
 
-* **Rooms:**
-    * `Capacity`: Maximum occupancy.
-    * `FloorType`: Required surface (e.g., sprung wood, marley).
-* **Teachers:**
-    * `Qualifications`: Boolean map of authorized class types (e.g., Ballet, Pointe).
-    * `Availability`: Hard un-availability blocks.
-    * `Preferences`: Target weekly hours, shift continuity preferences.
-* **Classes/Curriculum:**
-    * `Type/Level`: Subject and skill level.
-    * `Duration`: Time required (e.g., 45 mins, 60 mins).
-    * `Hardware Requirements`: Required room attributes.
-* **Students/Families:**
-    * `Family ID`: Grouping parameter for siblings.
-    * `Enrollment`: Requested classes per student.
+Data is strictly segregated from the solver's internal variables. Inputs are ingested via structured files (e.g., CSV) and parsed into native data classes.
 
-### 4. Constraints
-Constraints dictate the rules the solver must follow.
+#### Rooms
 
-#### Hard Constraints (Must Satisfy)
-* **Resource Uniqueness:** A teacher can only be in one room at a time.
-* **Room Exclusivity:** A room can only host one class at a time.
-* **Equipment Matching:** Class hardware requirements must match the assigned room's attributes.
-* **Qualifications:** Teachers can only be assigned to classes they are qualified to teach.
+* `Room_ID`: Unique string/integer identifier.
+* `Capacity`: Maximum student occupancy (Integer).
+* `Floor`: Required surface (Enum/String).
 
-#### Soft Constraints / Cost Function (Minimize Violations)
-* **The "Parent Taxi" Penalty:** High penalty for scheduling gaps between classes taken by siblings (linked via Family ID).
-* **Teacher Gap Penalty:** Penalty for fragmented teaching schedules (e.g., 1-hour class, 2-hour gap, 1-hour class).
-* **Age/Level Sequencing:** Preference for chronological flow (younger students earlier in the day, advanced students later).
+#### Classes
 
-### 5. Operational Workflow & Iteration
-Schedule refinement is achieved by adjusting inputs and re-running the solver, never by manually editing the output files. This ensures reproducibility.
+* `Class_ID`: Unique string/integer identifier.
+* `Type`: Subject category (e.g., `BALLET`, `TAP`, `CONTEMPORARY`, `HIPHOP`, `JAZZ`, `POINTE`).
+* `Skill_Level`: Progression tier (e.g., `BEGINNER`, `INTERMEDIATE`, `ADVANCED`, `NA`).
+* `Min_Age` / `Max_Age`: Integer bounds defining the target demographic.
+* `Class_Size`: Anticipated or maximum enrollment (Integer).
+* `Duration_Epochs`: Length of the class calculated in base time units.
+* `Floor_Req`: Required floor.
+* **Pinning Fields (Optional):** `Pinned_Epoch`, `Pinned_Room_ID`, `Pinned_Teacher_ID`. Used to manually force assignments prior to the search.
 
-* **Variable Pinning (Partial Assignments):** If a specific class must happen at a specific time/room, it is hardcoded via an input CSV prior to the solver run. The solver works around this pinned variable.
-* **Constraint Weight Tuning:** Soft constraints are exposed in a configuration file (e.g., `config.json`). To fix a specific bad outcome (like too much parent waiting), the corresponding penalty weight is increased.
-* **Version Control:** Input CSVs and configuration files are tracked via Git. "What-if" scenarios are tested on separate branches to provide an audit trail of how data changes affect the final schedule.
+#### Teachers
 
-### 6. Output Artifacts & Visualization
-The engine generates deterministic, machine-readable outputs that serve dual purposes: system integration and human visualization.
+* `Teacher_ID`: Unique string/integer identifier.
+* `Qualifications`: Array of allowed `Type:Skill_Level` pairings.
+* `Unavailable_Epochs`: Array of integers representing hard block-outs.
+* `Max_Consecutive_Epochs`: Integer limit before a mandatory break is required.
+* `Target_Hours`: Soft target for weekly workload.
 
-#### File Formats
-* `.csv` (Comma-Separated Values): Used for bulk ingest back into studio management software and flat-file storage.
-* `.ics` (iCalendar): Generated for specific individuals (teachers, parents) to allow one-click syncing to personal calendar apps.
+### 4. Constraints (The Logic Engine)
 
-#### Visualization Strategy (Dimensional Slicing)
-Because a single master calendar cannot elegantly display multidimensional constraints, the data is pivoted into specific operational views:
-1.  **The Resource Gantt (Room Slice):** Y-Axis = Rooms, X-Axis = Time. Used to visually verify spatial utilization and absence of double-bookings. (Artifact: Master Studio View).
-2.  **The Swimlane View (Teacher Slice):** Y-Axis = Teachers, X-Axis = Time. Used to check for burnout and schedule gaps. (Artifact: Individual Instructor Schedule).
-3.  **The Cohort Matrix (Student/Family Slice):** Y-Axis = Cohort/Family, X-Axis = Time. Used to verify the continuous block of classes for the "Parent Taxi" constraint. (Artifact: Curriculum Track).
+Constraints govern the relationships between the decision variables.
+
+#### Hard Constraints (Infeasibility Triggers)
+
+* **Spatial Exclusivity:** No two class `IntervalVar` assignments sharing the same `RoomVar` can overlap in time.
+* **Staff Exclusivity:** No two class `IntervalVar` assignments sharing the same `TeacherVar` can overlap in time.
+* **Capacity Limit:** Assigned room `Capacity` must be $\ge$ class `Class_Size`.
+* **Hardware Match:** Assigned room `Floor` must strictly equal class `Floor_Req`.
+* **Qualification Match:** Assigned `TeacherVar` must possess the exact `Type:Skill_Level` required by the class.
+* **Labor Limits:** Total consecutive teaching time without a gap must be $\le$ teacher's `Max_Consecutive_Epochs`.
+
+#### Soft Constraints & Objective Function (Minimization Targets)
+
+The solver evaluates and sums the following penalties to find the mathematically optimal schedule.
+
+1. **Chronological Age Weighting (Early Bird):** Younger age groups are penalized for late start times.
+* $\text{Penalty} = (\text{Start\_Epoch} - \text{Ideal\_Epoch}) \times (\text{Age\_Weight} - \text{Min\_Age})$
+
+
+2. **Parallel Scheduling Reward:** Incentivizes simultaneous scheduling for classes of the exact same `Type` and `Min_Age`, but different `Skill_Level`--allows mixing skill levels in an age group while maintaining per-dancer schedule continuity.
+* If $\text{Start}(C_1) == \text{Start}(C_2)$, apply negative penalty (reward).
+
+
+3. **Sequential Scheduling Weighting:** Incentivizes contiguous, non-overlapping scheduling for classes of the same `Min_Age` but different `Type` (allowing a student to take Tap directly after Ballet).
+* Reward if $\text{End}(C_1) == \text{Start}(C_2)$. Heavily penalize if $\text{Interval}(C_1)$ and $\text{Interval}(C_2)$ overlap.
+
+
+4. **Teacher Gap Penalty:** Penalizes fragmented teaching schedules.
+* For classes assigned to the same teacher on the same day: $\text{Penalty} = (\text{Start}(B) - \text{End}(A)) \times \text{Gap\_Weight}$.
+  * NOTE TO SELF: different-size gaps may have different penalties (i.e., "big but not big enough to go home")--meal breaks might nave a negative penalty
+
+5. **Workload Optimization:** Penalizes deviation from a teacher's `Target_Hours`.
+
+6. **Substitute Availability Penalty:** Penalize schedules where no substitude (additional teacher with the same `Type:Skill_Level` capability) is free
+
+7. **Room Right-Sizing:** Minimize wasted capacity
+
+### 5. Operational Workflow
+
+1. **Pre-Search Filtering:** The system parses input data. Instead of loading every teacher into every class's variable domain, it pre-filters `TeacherVar` domains strictly to qualified candidates, heavily pruning the search tree.
+2. **Variable Pinning:** Any class with `Pinned` fields in the input data is locked via strict equality constraints (e.g., `Start_Epoch == Pinned_Epoch`) before the solver initiates.
+3. **Execution & Tuning:** The CP-SAT solver runs until it hits an optimal state, a wall-clock timeout limit, or an infeasibility flag. Soft constraint weights are maintained in an external configuration file to allow iterative human tuning without code changes.
+
+### 6. Output Artifacts
+
+The engine generates a strictly deterministic, flat intermediary output that can be utilized by downstream database systems or CSV exports.
+
+The standard output object is a flat list of mapped assignments:
+
+* `Class_ID`
+* `Assigned_Start_Epoch` (converted back to standard datetime)
+* `Assigned_Room_ID`
+* `Assigned_Teacher_ID`
