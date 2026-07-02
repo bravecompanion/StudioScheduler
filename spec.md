@@ -53,19 +53,19 @@ Data is strictly segregated from the solver's internal variables. Inputs are ing
 * `Capacity`: Maximum student occupancy (Integer).
 * `Attributes`: A boolean attribute map of the room's fixed features (e.g., `Floor=SPRUNG`, `Has_Barre=true`, `Has_Mirrors=true`). Replaces the single `Floor` field so requirements beyond flooring (barres for ballet/pointe, mirrors, etc.) can be matched generically.
 
+#### Cohorts (Age Group Mapping)
+
+* `Age_Group`: Unique identifier for the cohort (e.g., `TINY_TOTS`, `MINI`, `JUNIOR`, `TEEN`).
+* `Min_Age` / `Max_Age`: Integer bounds defining the target demographic. This mapping is used by the preprocessing layer so age bounds don't need to be repeated on every class. Used for the Early-Bird penalty and reporting.
+
 #### Classes
 
 * `Class_ID`: Unique string/integer identifier.
 * `Type`: Subject category (e.g., `BALLET`, `TAP`, `CONTEMPORARY`, `HIPHOP`, `JAZZ`, `POINTE`).
-* `Skill_Level`: Progression tier (e.g., `BEGINNER`, `INTERMEDIATE`, `ADVANCED`, `NA`).
-* `Age_Group`: Explicit cohort identifier used for **all** continuity grouping (replaces overloading `Min_Age` as the group key). Two classes share a cohort only if their `Age_Group` matches.
-* `Min_Age` / `Max_Age`: Integer bounds defining the target demographic (retained for the Early-Bird term and reporting).
+* `Age_Group`: The cohort identifier this class belongs to. The solver pulls `Min_Age` and `Max_Age` from the Cohorts mapping via this key. Two classes share a cohort only if their `Age_Group` matches.
 * `Class_Size`: Anticipated enrollment (Integer). **Note:** under "Schedule First, Register Later" this is an *estimate*; capacity and right-sizing are optimized against a forecast, not actuals.
-* `Duration_Epochs`: Length of one session in epochs.
-* `Sessions_Per_Week`: Number of weekly meetings (default 1). Multi-session classes are placed on **distinct, preferably non-adjacent days** (§4).
-* `Required_Attributes`: The set of room attributes this class needs (e.g., `Floor=MARLEY`, `Has_Barre=true`). Matched against the room `Attributes` map.
-* `Ideal_Epoch`: Per-class preferred *time-of-day* start used by the Early-Bird term. Defined as an input rather than assumed.
-* **Pinning Fields (Optional):** `Pinned_Epoch`, `Pinned_Room_ID`, `Pinned_Teacher_ID`. Any subset may be set independently to force assignments prior to the search.
+* `Duration_Minutes`: Length of one session in minutes. The preprocessing layer divides this by `Epoch_Minutes` to get the internal `Duration_Epochs`.
+* **Pinning Fields (Optional):** `Pinned_Time`, `Pinned_Room_ID`, `Pinned_Teacher_ID`. Any subset may be set independently to force assignments prior to the search. `Pinned_Time` (e.g., "MON 17:00") is converted to `Pinned_Epoch` internally.
 
 #### Teachers
 
@@ -99,9 +99,9 @@ Constraints govern the relationships between the decision variables.
 
 All terms are integer-scaled and normalized to a common scale before weighting (§2.3). Rewards are bounded negative penalties.
 
-1. **Chronological Age Weighting (Early Bird):** Younger cohorts are penalized for late starts **only**.
-* $\text{Penalty} = \max(0,\ \text{Start\_Epoch} - \text{Ideal\_Epoch}) \times \text{Age\_Weight}$
-* $\text{Age\_Weight} = \max(0,\ \text{AGE\_PIVOT} - \text{Min\_Age})$, where `AGE_PIVOT` is a config constant. This makes the multiplier **larger for younger** students and guarantees it is non-negative. Starting earlier than ideal earns no reward (clamped at 0).
+1. **Chronological Age Weighting (Early Bird):** Younger cohorts are penalized for starting later in the day. By using the studio's daily opening time as the baseline, we avoid needing to manually define an "ideal" start time per class.
+* $\text{Penalty} = (\text{Start\_Epoch} - \text{Open\_Epoch}) \times \text{Age\_Weight}$
+* $\text{Age\_Weight} = \max(0,\ \text{AGE\_PIVOT} - \text{Min\_Age})$, where `AGE_PIVOT` is a config constant. This makes the penalty multiplier **larger for younger** students and zeroes it out entirely for older students.
 
 2. **Parallel Scheduling Reward:** For class pairs of the same `Type` and `Age_Group` but different `Skill_Level`, reward simultaneous starts (mixing levels within a cohort while preserving per-dancer continuity).
 * If $\text{Start}(C_1) = \text{Start}(C_2)$, apply a **bounded** reward. Pairs are pre-filtered so only eligible same-cohort pairs create reified variables, avoiding the $O(n^2)$ blow-up.
