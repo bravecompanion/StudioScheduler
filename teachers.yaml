@@ -146,10 +146,9 @@ EmilyJ:
     - TUE
     - WED
     - THU
-    ** TODO ** COME BACK TO THIS
-  avail_start: (see other spreadsheet)
-  avail_end: 
-  days_requested:
+  avail_start: 16:00
+  avail_end: 20:00
+  days_requested: 3
   love_class:
     - jazz
     - tinydancers

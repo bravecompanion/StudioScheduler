@@ -1,232 +1,231 @@
-type: ballet
-cohort: "12+"
-teachers:
-  - Meredith
-  - Qs
-  - Morganne
+- type: ballet
+  cohort: "12+"
+  teachers:
+    - Meredith
+    - Qs
+    - Morganne
 
-type: ballet
-cohort: "6-8"
-teachers:
-  - JessicaF
-  - Meredith
-  - Qs
-  - Morganne
-  - Catherine
+- type: ballet
+  cohort: "6-8"
+  teachers:
+    - JessicaF
+    - Meredith
+    - Qs
+    - Morganne
+    - Catherine
 
-type: ballet
-cohort: "9-12"
-teachers:
-  - Meredith
-  - Morganne
-  - Qs
-  - Courtney
+- type: ballet
+  cohort: "9-12"
+  teachers:
+    - Meredith
+    - Morganne
+    - Qs
+    - Courtney
 
-type: bittyboppers
-cohort: "5-7"
-teachers:
-  - Stephanie
+- type: bittyboppers
+  cohort: "5-7"
+  teachers:
+    - Stephanie
 
-type: contemporary
-cohort: "12+"
-teachers:
-  - Qs
-  - HailleBell
-  - Courtney
-  - Morganne
-  - Lauren
-  - Cameron
+- type: contemporary
+  cohort: "12+"
+  teachers:
+    - Qs
+    - HailleBell
+    - Courtney
+    - Morganne
+    - Lauren
+    - Cameron
 
-type: contemporary
-cohort: "6-9"
-teachers:
-  - HailleBell
-  - Jessica
-  - EmilyJ
-  - Morganne
-  - Catherine
-  - Lauren
-  - Cameron
-  - Qs
+- type: contemporary
+  cohort: "6-9"
+  teachers:
+    - HailleBell
+    - Jessica
+    - EmilyJ
+    - Morganne
+    - Catherine
+    - Lauren
+    - Cameron
+    - Qs
 
-type: contemporary
-cohort: "9-12"
-teachers:
-  - Qs
-  - HailleBell
-  - EmilyJ
-  - Courtney
-  - Morganne
-  - Lauren
-  - Cameron
+- type: contemporary
+  cohort: "9-12"
+  teachers:
+    - Qs
+    - HailleBell
+    - EmilyJ
+    - Courtney
+    - Morganne
+    - Lauren
+    - Cameron
 
-type: acro
-cohort: all
-teachers:
-  - Jordan
-  - Katie
-  - Stephanie
-  - HailleBell
-  - Morganne
+- type: acro
+  cohort: all
+  teachers:
+    - Jordan
+    - Katie
+    - Stephanie
+    - HailleBell
+    - Morganne
 
-type: hiphop
-cohort: "12+"
-teachers:
-  - Courtney
-  - HailleBell
-  - Cameron
+- type: hiphop
+  cohort: "12+"
+  teachers:
+    - Courtney
+    - HailleBell
+    - Cameron
 
-type: hiphop
-cohort: "6-8"
-teachers:
-  - HailleBell
-  - HayleyTipton
-  - EmilyJ
-  - Cameron
+- type: hiphop
+  cohort: "6-8"
+  teachers:
+    - HailleBell
+    - HayleyTipton
+    - EmilyJ
+    - Cameron
 
-type: hiphop
-cohort: "9-12"
-teachers:
-  - HailleBell
-  - EmilyJ
-  - Courtney
-  - Morganne
-  - Cameron
+- type: hiphop
+  cohort: "9-12"
+  teachers:
+    - HailleBell
+    - EmilyJ
+    - Courtney
+    - Morganne
+    - Cameron
 
-type: jazz
-cohort: "12+"
-teachers:
-  - HailleBell
-  - Courtney
-  - Qs
-  - Morganne
-  - EmilyJ
-  - Lauren
-  - Cameron
+- type: jazz
+  cohort: "12+"
+  teachers:
+    - HailleBell
+    - Courtney
+    - Qs
+    - Morganne
+    - EmilyJ
+    - Lauren
+    - Cameron
 
-type: jazz
-cohort: "6-8"
-teachers:
-  - EmilyJ
-  - Katie
-  - Haille
-  - Hayley
-  - Jordan
-  - Meredith
-  - Jessica
-  - Kristian
-  - Catherine
-  - Stephanie
-  - Lauren
-  - Qs
+- type: jazz
+  cohort: "6-8"
+  teachers:
+    - EmilyJ
+    - Katie
+    - Haille
+    - Hayley
+    - Jordan
+    - Meredith
+    - Jessica
+    - Kristian
+    - Catherine
+    - Stephanie
+    - Lauren
+    - Qs
 
-type: jazz
-cohort: "9-12"
-teachers:
-  - HailleBell
-  - EmilyJ
-  - Katie
-  - Jordan
-  - Courtney
-  - Qs
-  - Meredith
-  - Stephanie
-  - Lauren
-  - Cameron
+- type: jazz
+  cohort: "9-12"
+  teachers:
+    - HailleBell
+    - EmilyJ
+    - Katie
+    - Jordan
+    - Courtney
+    - Qs
+    - Meredith
+    - Stephanie
+    - Lauren
+    - Cameron
 
-type: ballet
-cohort: "5-7"
-teachers:
-  - JessicaF
-  - Morganne
-  - Catherine
+- type: ballet
+  cohort: "5-7"
+  teachers:
+    - JessicaF
+    - Morganne
+    - Catherine
 
-type: jazz
-cohort: "5-7"
-teachers:
-  - Hayley
-  - Katie
-  - Morganne
-  - Kristian
-  - Catherine
-  - Stephanie
+- type: jazz
+  cohort: "5-7"
+  teachers:
+    - Hayley
+    - Katie
+    - Morganne
+    - Kristian
+    - Catherine
+    - Stephanie
 
-type:
-  - jazz
-  - ballet
-cohort: "5-7"
-teachers:
-  - JessicaF
-  - Morganne
-  - Catherine
+- type:
+    - jazz
+    - ballet
+  cohort: "5-7"
+  teachers:
+    - JessicaF
+    - Morganne
+    - Catherine
 
-type:
-  - tap
-cohort: "6-9"
-teachers:
-  - Stephanie
-  - Lauren
-  - JessicaF
-  - Cameron
+- type:
+    - tap
+  cohort: "6-9"
+  teachers:
+    - Stephanie
+    - Lauren
+    - JessicaF
+    - Cameron
 
-type:
-  - tinydancers
-cohort: "3-4"
-teachers:
-  - EmilyJ
-  - HayleyTipton
-  - JessicaF
-  - HailleBell
-  - Morganne
-  - Catherine
-  - Stephanie
+- type:
+    - tinydancers
+  cohort: "3-4"
+  teachers:
+    - EmilyJ
+    - HayleyTipton
+    - JessicaF
+    - HailleBell
+    - Morganne
+    - Catherine
+    - Stephanie
 
-type:
-  - tinytots
-cohort: "2"
-teachers:
-  - EmilyJ
-  - HailleBell
-  - Morganne
-  - Catherine
-  - Stephanie
+- type:
+    - tinytots
+  cohort: "2"
+  teachers:
+    - EmilyJ
+    - HailleBell
+    - Morganne
+    - Catherine
+    - Stephanie
 
-type:
-  - tippytoes
-cohort: "5-7"
-teachers:
-  - HailleBell
-  - JessicaF
-  - Morganne
-  - Catherine
-  - Stephanie
+- type:
+    - tippytoes
+  cohort: "5-7"
+  teachers:
+    - HailleBell
+    - JessicaF
+    - Morganne
+    - Catherine
+    - Stephanie
 
-type:
-  - acro
-cohort: "3-4"
-teachers:
-  - Katie
-  - HailleBell
-  - Stephanie
+- type:
+    - acro
+  cohort: "3-4"
+  teachers:
+    - Katie
+    - HailleBell
+    - Stephanie
 
-type: littles
-cohort: "baby"
-teachers:
-  - HailleBell
-  - Catherine
+- type: littles
+  cohort: "baby"
+  teachers:
+    - HailleBell
+    - Catherine
 
-type: tap
-cohort: "9-12"
-teachers:
-  - Stephanie
-  - Lauren
-  - JessicaF
-  - Cameron
+- type: tap
+  cohort: "9-12"
+  teachers:
+    - Stephanie
+    - Lauren
+    - JessicaF
+    - Cameron
 
-type: conditioning
-cohort: all
-teachers:
-  - Kristian
-  - Katie
-  - Cameron
-
+- type: conditioning
+  cohort: all
+  teachers:
+    - Kristian
+    - Katie
+    - Cameron
