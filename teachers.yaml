@@ -1,0 +1,447 @@
+Meredith:
+  avail_days:
+    - TUE
+    - THU
+  avail_start: 16:30
+  avail_end: 21:00
+  love_class:
+    - ballet
+    - pointe
+    - pre-pointe
+    - jazz
+  hate_class:
+    - tap
+    - hiphop
+  love_cohort:
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "5-7"
+  days_requested: 2
+
+HailleBell:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+  avail_start: 16:00
+  avail_end: 21:00
+  love_class:
+    - jazz
+    - contemporary
+    - hiphop
+  hate_class:
+    - tap
+    - ballet
+    - bittyboppers
+  love_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "5-7"
+  days_requested: 4
+
+Katie:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+  avail_start: 15:30
+  avail_end: 18:30
+  days_requested: 3
+  love_class:
+    - jazz
+  hate_class:
+    - tap
+  love_cohort:
+    - "5-7"
+    - "6-8"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "12+"
+
+HayleyTipton:
+  avail_days:
+    - MON
+    - WED
+  avail_start: 15:45
+  avail_end: 18:30
+  days_requested: 2
+  love_class:
+    - jazz
+    - hiphop
+    - sidekicks
+    - tinydancers
+  hate_class:
+    - bittyboppers
+    - tippytoes
+  love_cohort:
+    - "3-4"
+    - "5-7"
+    - "6-8"
+  hate_cohort:
+    - "9-12"
+    - "12+"
+
+JessicaF:
+  avail_days:
+    - THU
+  avail_start: 15:45
+  avail_end: 19:00
+  days_requested: 1
+  love_class:
+    - contemporary
+    - ballet
+    - tap
+  hate_class:
+  love_cohort:
+    - "3-4"
+    - "5-7"
+    - "6-8"
+  hate_cohort:
+
+Jordan:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+  avail_start: 16:00
+  avail_end: 21:00
+  days_requested: 1
+  love_class:
+    - acro
+    - jazz
+  hate_class:
+    - ballet
+    - contemporary
+  love_cohort:
+    - "5-7"
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+
+EmilyJ:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+    ** TODO ** COME BACK TO THIS
+  avail_start: (see other spreadsheet)
+  avail_end: 
+  days_requested:
+  love_class:
+    - jazz
+    - tinydancers
+    - tinytots
+    - sidekicks
+  hate_class:
+    - acro
+  love_cohort:
+    - "2"
+    - "3-4"
+    - "9-12"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "5-7"
+
+Morganne:
+  avail_days:
+    - TUE
+    - WED
+    - THU
+  avail_start: 16:15
+  avail_end: 21:00
+  days_requested: 3
+  love_class:
+    - ballet
+    - tinytots
+    - tinydancers
+    - tippytoes
+    - jazz
+    - contemporary
+  hate_class:
+    - hiphop
+  love_cohort:
+    - "2"
+    - "3-4"
+    - "5-7"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+
+Courtney:
+  avail_days:
+    - TUE
+    - WED
+    - THU
+  avail_start: 15:30
+  avail_end: 21:00
+  days_requested: 1
+  love_class:
+    - hiphop
+    - contemporary
+  hate_class:
+    - tap
+    - acro
+  love_cohort:
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "5-7"
+    - "6-8"
+
+Kristian:
+  avail_days:
+    - MON
+    - WED
+    - THU
+  avail_start: 15:30
+  avail_end: 21:00
+  days_requested: 2
+  love_class:
+    - conditioning
+    - jazz
+    - sidekicks
+  hate_class:
+    - tap
+    - ballet
+  love_cohort:
+    - "5-7"
+    - "6-8"
+    - "9-12"
+    - "12+"
+  hate_cohort:
+    - "baby"
+    - "2"
+
+Catherine:
+  avail_days:
+    - MON
+    - WED
+  avail_start: 16:00
+  avail_end: 19:00
+  days_requested: 2
+  love_class:
+    - jazz
+    - ballet
+    - contemporary
+  hate_class:
+    - tap
+  love_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "5-7"
+    - "6-8"
+  hate_cohort:
+    - "9-12"
+    - "12+"
+    - "advanced"
+
+Stephanie:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+  avail_start: 16:00
+  avail_end: 21:00
+  days_requested: 4
+  love_class:
+    - tap
+    - sidekicks
+    - connections
+    - company
+    - acro
+    - tinytots
+    - tinydancers
+    - tippytoes
+    - jazz
+  love_cohort:
+    - "3-4"
+    - "5-7"
+    - "6-8"
+    - "9-12"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "12+"
+
+StephanieB:
+  avail_days:
+    - TUE
+    - WED
+  avail_start: 16:30
+  avail_end: 21:00
+  days_requested: 2
+  love_class:
+    - ballet
+  hate_class:
+    - tap
+  love_cohort:
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+
+Lauren:
+  avail_days:
+    - MON
+    - WED
+    - THU
+  avail_start: 15:30
+  avail_end: 21:00
+  days_requested: 1
+  love_class:
+    - tap
+    - jazz
+    - contemporary
+  hate_class:
+    - hiphop
+    - acro
+  love_cohort:
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "5-7"
+
+Cameron:
+  avail_days:
+    - MON
+    - TUE
+    - WED
+    - THU
+  avail_start: 16:00
+  avail_end: 21:00
+  days_requested: 4
+  love_class:
+    - jazz
+    - conditioning
+    - contemporary
+  hate_class:
+    - ballet
+  love_cohort:
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+
+Ben:
+  avail_days:
+    - WED
+    - THURS
+  avail_start: 15:30
+  avail_end: 21:00
+  days_requested: 2
+  love_class:
+    - tap
+    - hiphop
+  hate_class:
+    - ballet
+  love_cohort:
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+
+Shelby:
+  avail_days:
+    - WED
+  avail_start: 15:30
+  avail_end: 19:30
+  days_requested: 2
+  love_class:
+    - jazz
+    - contemporary
+  hate_class:
+    - hiphop
+    - ballet
+    - tap
+  love_cohort:
+    - "advanced"
+  hate_cohort:
+
+Amanda:
+  avail_days:
+    - MON
+    - TUE
+  avail_start: 17:15
+  avail_end: 21:00
+  days_requested: 1
+  love_class:
+    - ballet
+  hate_class:
+    - tap
+  love_cohort:
+    - "6-8"
+    - "9-12"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "12+"
+
+Caitlynn:
+  avail_days:
+    - MON
+    - TUE
+  avail_start: 17:00
+  avail_end: 21:00
+  days_requested: 2
+  love_class:
+    - jazz
+    - ballet
+    - contemporary
+  hate_class:
+    - tap
+    - acro
+    - hiphop
+  love_cohort:
+    - "6-8"
+    - "9-12"
+    - "12+"
+    - "advanced"
+  hate_cohort:
+    - "baby"
+    - "2"
+    - "3-4"
+    - "5-7"

@@ -65,12 +65,14 @@ Data is strictly segregated from the solver's internal variables. Inputs are ing
 * `Age_Group`: The cohort identifier this class belongs to. The solver pulls `Min_Age` and `Max_Age` from the Cohorts mapping via this key. Two classes share a cohort only if their `Age_Group` matches.
 * `Class_Size`: Anticipated enrollment (Integer). **Note:** under "Schedule First, Register Later" this is an *estimate*; capacity and right-sizing are optimized against a forecast, not actuals.
 * `Duration_Minutes`: Length of one session in minutes. The preprocessing layer divides this by `Epoch_Minutes` to get the internal `Duration_Epochs`.
+* `Sessions_Per_Week`: Number of weekly meetings (default 1). Multi-session classes are placed on **distinct, preferably non-adjacent days** (§4).
+* `Required_Attributes`: The set of room attributes this class needs (e.g., `Floor=MARLEY`, `Has_Barre=true`). Matched against the room `Attributes` map.
+* `Preferred_Teachers`: An ordered list of `Teacher_ID`s allowed to teach this class. The first element is the most preferred, the second is the backup, etc. Any teacher not in this list is strictly forbidden from being assigned to this class.
 * **Pinning Fields (Optional):** `Pinned_Time`, `Pinned_Room_ID`, `Pinned_Teacher_ID`. Any subset may be set independently to force assignments prior to the search. `Pinned_Time` (e.g., "MON 17:00") is converted to `Pinned_Epoch` internally.
 
 #### Teachers
 
 * `Teacher_ID`: Unique string/integer identifier.
-* `Qualifications`: Allowed `Type:Skill_Level` pairings. Qualifications are **hierarchical**: authorization at a level implies authorization for all lower levels of the same `Type` (e.g., `BALLET:ADVANCED` ⇒ `BALLET:INTERMEDIATE`, `BALLET:BEGINNER`). Expanded during preprocessing so data entry lists only the highest level.
 * `Availability`: Human-entered day/time ranges of **hard unavailability** (e.g., "MON before 16:00"). Preprocessing converts these to the internal `Unavailable_Epochs` set. Captures hard blocks only; preferences are expressed via soft terms.
 * `Max_Consecutive_Epochs`: Limit on back-to-back teaching before a mandatory break (see Labor Limits, §4).
 * `Target_Hours`: Soft target for weekly workload.
@@ -90,7 +92,7 @@ Constraints govern the relationships between the decision variables.
 * **Staff Exclusivity:** Enforced via `AddNoOverlap` over each teacher's optional class intervals; a teacher is never double-booked.
 * **Capacity Limit:** The active room's `Capacity` $\ge$ the class's `Class_Size` (estimate). Enforced by restricting each class's candidate-room set during pre-filtering.
 * **Attribute Match:** The active room's `Attributes` must satisfy every entry in the class's `Required_Attributes`. Applied during pre-filtering, so non-matching rooms never enter the domain.
-* **Qualification Match:** The active teacher must hold the class's required `Type:Skill_Level` after hierarchical expansion. Applied during pre-filtering.
+* **Teacher Eligibility:** The active teacher must be present in the class's `Preferred_Teachers` list. Applied during pre-filtering so non-listed teachers never enter the domain.
 * **Multi-Session Separation:** The `Sessions_Per_Week` instances of a class must fall on distinct days (a non-adjacent-day preference is applied as soft term 7).
 
 > **Implementation note — Labor Limits reclassified.** Enforcing "consecutive teaching time $\le$ `Max_Consecutive_Epochs`" *exactly* requires reasoning over chains of back-to-back assignments per teacher, which is expensive and brittle. For v1 it is implemented as a **soft** penalty (or an approximate per-window load cap) — see soft term 8 — and only promoted to a hard constraint if a studio requires it.
@@ -124,11 +126,13 @@ All terms are integer-scaled and normalized to a common scale before weighting (
 
 10. **Variety of Teachers:** For classes of the same `Type` and `Age_Group`, reward distributing the assignments across different teachers to ensure students have a choice of instructors.
 
-11. **Traffic Smoothing (Hallway/Parking Logistics):** Penalize having many classes start at the exact same epoch globally across the studio. This flattens the peak load of simultaneous arrivals and departures.
+11. **Teacher Preference Weighting:** Reward assigning the class to teachers higher up on its `Preferred_Teachers` list. The 1st choice receives the maximum reward, the 2nd choice receives less, and so on.
 
-12. **Late Session Guarantee:** For each cohort (`Type` and `Age_Group`), heavily penalize if *no* session is scheduled after a designated late-afternoon threshold (e.g., 16:00 / 4:00 PM).
+12. **Traffic Smoothing (Hallway/Parking Logistics):** Penalize having many classes start at the exact same epoch globally across the studio. This flattens the peak load of simultaneous arrivals and departures.
 
-13. **Substitute Availability — DEFERRED (post-MVP):** Reward schedules where, for each class, another qualified teacher is free during that slot (resilience to call-outs). This term reasons counterfactually over all other assignments and is the most expensive in the model; it is **excluded from v1** and revisited once the core solves comfortably within the time budget.
+13. **Late Session Guarantee:** For each cohort (`Type` and `Age_Group`), heavily penalize if *no* session is scheduled after a designated late-afternoon threshold (e.g., 16:00 / 4:00 PM).
+
+14. **Substitute Availability — DEFERRED (post-MVP):** Reward schedules where, for each class, another qualified teacher is free during that slot (resilience to call-outs). This term reasons counterfactually over all other assignments and is the most expensive in the model; it is **excluded from v1** and revisited once the core solves comfortably within the time budget.
 
 ### 5. Operational Workflow
 
@@ -168,8 +172,8 @@ The following are locked for **v1**; the rest are explicitly deferred.
 **In scope (v1):**
 * Time model with per-day epochs and operating windows (§2.1).
 * Optional-interval decomposition for room/teacher exclusivity (§2.2).
-* Hard constraints: operating window, spatial/staff exclusivity, capacity, attribute match, qualification match, multi-session separation.
-* Soft terms: Early Bird (fixed formula), Parallel reward, Sequential weighting, bucketed Teacher Gap, Workload, Room Right-Sizing, Multi-Session Day Spread, Labor Smoothness, Start Time Variety, Teacher Variety, Traffic Smoothing, Late Session Guarantee.
+* Hard constraints: operating window, spatial/staff exclusivity, capacity, attribute match, teacher eligibility, multi-session separation.
+* Soft terms: Early Bird (fixed formula), Parallel reward, Sequential weighting, bucketed Teacher Gap, Workload, Room Right-Sizing, Multi-Session Day Spread, Labor Smoothness, Start Time Variety, Teacher Variety, Teacher Preference, Traffic Smoothing, Late Session Guarantee.
 * Pre-flight validation, penalty scorecard, solve report.
 * Deterministic solver configuration.
 
