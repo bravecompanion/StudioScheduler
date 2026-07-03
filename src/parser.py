@@ -1,0 +1,169 @@
+import pandas as pd
+import yaml
+import re
+from typing import List, Dict, Tuple
+from .models import Room, Teacher, ClassSession, StudioCalendar
+
+def time_to_epochs(time_str: str, cal: StudioCalendar) -> int:
+    """Converts a time string like '16:30' to epochs relative to the open time."""
+    if pd.isna(time_str) or not str(time_str).strip():
+        return None
+    # handle cases where time is float or int somehow
+    time_str = str(time_str).strip()
+    # Check for invalid formats
+    if ":" not in time_str:
+        return None
+        
+    h, m = map(int, time_str.split(':'))
+    open_h, open_m = map(int, cal.open_time.split(':'))
+    
+    minutes_since_midnight = h * 60 + m
+    open_minutes_since_midnight = open_h * 60 + open_m
+    
+    minutes_since_open = minutes_since_midnight - open_minutes_since_midnight
+    return minutes_since_open // cal.epoch_minutes
+
+def parse_pinned_time(pin_str: str, cal: StudioCalendar) -> int:
+    """Converts a pinned string like 'Monday-16:00' to a global epoch."""
+    if pd.isna(pin_str) or not str(pin_str).strip():
+        return None
+    pin_str = str(pin_str).strip()
+    parts = pin_str.split('-')
+    if len(parts) != 2:
+        return None
+    
+    day_str, time_str = parts
+    day_str = day_str.upper()[:3] # MON, TUE, etc.
+    
+    if day_str not in cal.days:
+        return None
+        
+    day_idx = cal.days.index(day_str)
+    day_base = day_idx * cal.day_offset
+    
+    epochs = time_to_epochs(time_str, cal)
+    if epochs is None:
+        return None
+        
+    return day_base + epochs
+
+def load_data(
+    rooms_csv: str, 
+    teachers_yaml: str, 
+    teacher_options_yaml: str, 
+    classes_csv: str,
+    cal: StudioCalendar
+) -> Tuple[List[Room], List[Teacher], List[ClassSession]]:
+    
+    # 1. Load Rooms
+    rooms_df = pd.read_csv(rooms_csv)
+    rooms = []
+    for _, row in rooms_df.iterrows():
+        rooms.append(Room(id=str(row['Room_ID']), capacity=int(row['Capacity'])))
+        
+    # 2. Load Teachers
+    with open(teachers_yaml, 'r') as f:
+        teachers_raw = yaml.safe_load(f)
+        
+    teachers = []
+    for t_id, t_data in teachers_raw.items():
+        if not isinstance(t_data, dict):
+            continue
+            
+        avail_start = time_to_epochs(t_data.get('avail_start', ''), cal)
+        avail_end = time_to_epochs(t_data.get('avail_end', ''), cal)
+        
+        # Handle EmilyJ placeholder parsing error gracefully
+        avail_days = t_data.get('avail_days', [])
+        clean_days = [d.upper() for d in avail_days if isinstance(d, str) and not d.startswith('**')]
+        
+        teachers.append(Teacher(
+            id=t_id,
+            avail_days=clean_days,
+            avail_start_epoch=avail_start,
+            avail_end_epoch=avail_end
+        ))
+        
+    # 3. Load Teacher Options (Routing table)
+    with open(teacher_options_yaml, 'r') as f:
+        options_raw = yaml.safe_load(f)
+        
+    # Build routing dict: (style, cohort) -> [teachers]
+    routing_table = {}
+    for block in options_raw:
+        if not block:
+            continue
+        types = block.get('type', [])
+        if isinstance(types, str):
+            types = [types]
+        if not types:
+            continue
+            
+        cohort = str(block.get('cohort', '')).strip()
+        pref_teachers = block.get('teachers', [])
+        
+        for t in types:
+            routing_table[(t.lower(), cohort)] = pref_teachers
+            
+    # 4. Load Classes
+    classes_df = pd.read_csv(classes_csv)
+    classes = []
+    for _, row in classes_df.iterrows():
+        class_id = str(row['ClassName'])
+        if pd.isna(row['ClassName']):
+            continue
+            
+        style = str(row['Style']).lower()
+        cohort = str(row['Cohort']).strip() if not pd.isna(row['Cohort']) else "all"
+        # CSV sometimes has escaped quotes like """12+""", strip them
+        cohort = cohort.replace('"', '').strip()
+        
+        # Find preferred teachers. Match exact style + cohort.
+        pref_teachers = routing_table.get((style, cohort), [])
+        if not pref_teachers and cohort == "":
+             pref_teachers = routing_table.get((style, "all"), [])
+        
+        if pd.isna(row['Duration']):
+            print(f"WARNING: Class {class_id} is missing a Duration. Defaulting to 45 mins.")
+            duration_mins = 45
+        else:
+            duration_mins = int(row['Duration'])
+        duration_epochs = duration_mins // cal.epoch_minutes
+        
+        size = int(row['Size']) if not pd.isna(row['Size']) else 20
+        
+        pin_t = row['PinTeacher']
+        if pd.isna(pin_t):
+            pin_t = None
+        else:
+            pin_t = str(pin_t).strip()
+            
+        pin_r = row['PinRoom']
+        if pd.isna(pin_r):
+            pin_r = None
+        else:
+            if isinstance(pin_r, float) and pin_r.is_integer():
+                pin_r = str(int(pin_r))
+            else:
+                pin_r = str(pin_r).strip()
+        
+        # Handle the user's "either-or" co-teaching string: 'EmilyJ/Cameron'
+        if pin_t and '/' in pin_t:
+            pref_teachers = pin_t.split('/')
+            pin_t = None
+            
+        pin_time = parse_pinned_time(row['PinTime'], cal)
+        
+        classes.append(ClassSession(
+            id=class_id,
+            style=style,
+            cohort=cohort,
+            duration_epochs=duration_epochs,
+            size=size,
+            preferred_teachers=pref_teachers,
+            pinned_teacher=pin_t,
+            pinned_time_epoch=pin_time,
+            pinned_room=pin_r
+        ))
+        
+    return rooms, teachers, classes
