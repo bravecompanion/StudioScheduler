@@ -132,16 +132,25 @@ class StudioSchedulerModel:
             self.model.Minimize(sum(self.penalties))
 
     def _penalize_late_young_classes(self):
-        """Soft Constraint: Push younger age groups to earlier time slots."""
+        """Soft Constraint: Push younger age groups to earlier time slots (Piecewise Step)."""
+        # Target cutoff time: 17:00 (5:00 PM). This is 90 mins after open (15:30).
+        target_mins_after_open = 90
+        target_epoch = target_mins_after_open // self.cal.epoch_minutes
+        
         for c in self.classes:
             if c.id not in self.class_vars: continue
             
-            weight = max(0, 20 - c.age_min)
+            weight = max(0, 18 - c.age_min)
             if weight > 0:
                 start_var = self.class_vars[c.id]['start']
                 epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'epoch_in_day_{c.id}')
                 self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
-                self.penalties.append(epoch_in_day * weight)
+                
+                # Piecewise Linear: 0 penalty before target, linearly scaling penalty after target
+                late_epochs = self.model.NewIntVar(0, self.cal.day_offset, f'late_epochs_{c.id}')
+                self.model.AddMaxEquality(late_epochs, [0, epoch_in_day - target_epoch])
+                
+                self.penalties.append(late_epochs * weight)
 
     def solve(self):
         solver = cp_model.CpSolver()
