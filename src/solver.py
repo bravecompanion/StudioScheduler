@@ -1,5 +1,7 @@
 from ortools.sat.python import cp_model
 from typing import List, Tuple
+import re
+from collections import defaultdict
 from .models import ClassSession, Room, Teacher, StudioCalendar
 
 class StudioSchedulerModel:
@@ -127,6 +129,7 @@ class StudioSchedulerModel:
 
     def add_soft_constraints(self):
         self._penalize_late_young_classes()
+        self._penalize_session_clustering()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -151,6 +154,49 @@ class StudioSchedulerModel:
                 self.model.AddMaxEquality(late_epochs, [0, epoch_in_day - target_epoch])
                 
                 self.penalties.append(late_epochs * weight)
+
+    def _penalize_session_clustering(self):
+        """Soft Constraint: Diversify the days on which multiple sessions of the same class are offered."""
+        # Group classes by base name
+        base_class_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            # Strip trailing _1, _2, etc. to get the base class name
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_groups[base_name].append(c)
+            
+        for base_name, class_list in base_class_groups.items():
+            if len(class_list) <= 1:
+                continue # No need to diversify a single session
+                
+            # Create a day variable for each session
+            class_day_vars = {}
+            for c in class_list:
+                start_var = self.class_vars[c.id]['start']
+                day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_{c.id}')
+                self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                class_day_vars[c.id] = day_var
+                
+            # For each day, count how many sessions land on it
+            for d_idx, day_str in enumerate(self.cal.days):
+                sessions_on_this_day = []
+                for c in class_list:
+                    day_var = class_day_vars[c.id]
+                    is_on_day = self.model.NewBoolVar(f'is_on_{day_str}_{c.id}')
+                    self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                    self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                    sessions_on_this_day.append(is_on_day)
+                    
+                count_on_day = self.model.NewIntVar(0, len(class_list), f'count_{base_name}_{day_str}')
+                self.model.Add(count_on_day == sum(sessions_on_this_day))
+                
+                # Penalize the square of the count to heavily prioritize even distributions.
+                # Example: 4 on Monday (16 penalty) vs 2 on Mon and 2 on Tue (4 + 4 = 8 penalty)
+                count_sq = self.model.NewIntVar(0, len(class_list) ** 2, f'count_sq_{base_name}_{day_str}')
+                self.model.AddMultiplicationEquality(count_sq, [count_on_day, count_on_day])
+                
+                # Multiply by a solid weight to heavily prioritize spreading them out
+                self.penalties.append(count_sq * 50)
 
     def solve(self):
         solver = cp_model.CpSolver()
