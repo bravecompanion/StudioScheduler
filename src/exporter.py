@@ -1,4 +1,5 @@
 import os
+import json
 
 def create_ical_content(events):
     lines = [
@@ -100,3 +101,57 @@ def export_to_ical(results, output_dir="calendars"):
             f.write(create_ical_content(evs))
             
     print(f"Generated {len(teacher_events)} teacher calendars, {len(room_events)} room calendars, and {len(cohort_events)} cohort calendars in the '{output_dir}/' directory.")
+
+def export_to_json(results, json_path="schedule.json"):
+    # Map days to a concrete "dummy" week so FullCalendar can plot them
+    day_map = {
+        'MON': '2026-07-06', 'TUE': '2026-07-07', 'WED': '2026-07-08',
+        'THU': '2026-07-09', 'FRI': '2026-07-10', 'SAT': '2026-07-11', 'SUN': '2026-07-12'
+    }
+
+    rooms = set()
+    teachers = set()
+    events = []
+
+    for r in results:
+        rooms.add(r['Room'])
+        teachers.add(r['Teacher'])
+
+        date_str = day_map.get(r['Day'].upper(), '2026-07-06')
+        start_time = r['Start_Time']
+        dur_mins = r['Duration_Mins']
+        
+        start_h, start_m = map(int, start_time.split(':'))
+        
+        # Calculate end time
+        end_mins_total = start_h * 60 + start_m + dur_mins
+        end_h = end_mins_total // 60
+        end_m = end_mins_total % 60
+        
+        start_str = f"{date_str}T{start_h:02d}:{start_m:02d}:00"
+        end_str = f"{date_str}T{end_h:02d}:{end_m:02d}:00"
+
+        events.append({
+            "id": r['Class_ID'],
+            "title": f"{r['Class_ID']} ({r['Cohort']})",
+            "start": start_str,
+            "end": end_str,
+            "extendedProps": {
+                "room_id": f"room_{r['Room']}",
+                "teacher_id": f"teacher_{r['Teacher']}",
+                "style": r.get('Style', '')
+            }
+        })
+
+    resources_rooms = [{"id": f"room_{rm}", "title": f"Room {rm}"} for rm in sorted(rooms)]
+    resources_teachers = [{"id": f"teacher_{t}", "title": t} for t in sorted(teachers)]
+
+    payload = {
+        "resources_rooms": resources_rooms,
+        "resources_teachers": resources_teachers,
+        "events": events
+    }
+
+    with open(json_path, 'w') as out_f:
+        json.dump(payload, out_f, indent=2)
+    print(f"Generated JSON schedule at {json_path}")

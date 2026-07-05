@@ -2,7 +2,7 @@ import pandas as pd
 from src.models import StudioCalendar
 from src.parser import load_data
 from src.solver import build_and_solve
-from src.exporter import export_to_ical
+from src.exporter import export_to_ical, export_to_json
 from ortools.sat.python import cp_model
 
 def main():
@@ -35,6 +35,9 @@ def main():
         
         # Generate iCal files
         export_to_ical(results)
+        
+        # Generate JSON file for frontend display
+        export_to_json(results)
     else:
         print("No schedule could be generated.")
 
