@@ -190,6 +190,8 @@ class StudioSchedulerModel:
 
     def _penalize_session_clustering(self):
         """Soft Constraint: Diversify the days on which multiple sessions of the same class are offered."""
+        CLUSTER_PENALTY = 75
+
         # Group classes by base name
         base_class_groups = defaultdict(list)
         for c in self.classes:
@@ -229,7 +231,7 @@ class StudioSchedulerModel:
                 self.model.AddMultiplicationEquality(count_sq, [count_on_day, count_on_day])
                 
                 # Multiply by a solid weight to heavily prioritize spreading them out
-                self.penalties.append(count_sq * 50)
+                self.penalties.append(count_sq * CLUSTER_PENALTY)
 
     def _penalize_teacher_schedule_span(self):
         """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
