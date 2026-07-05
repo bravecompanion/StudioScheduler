@@ -3,11 +3,11 @@ ballet_12plus,ballet,"""12+""",12,18,60,20,,,
 ballet_6to8_1,ballet,"""6-8""",6,8,60,20,,,
 ballet_6to8_2,ballet,"""6-8""",6,8,60,20,,,
 ballet_6to8_3,ballet,"""6-8""",6,8,60,20,,,
-bitty_boppers_1,littles,"""5-7""",5,6,60,12,,,
-bitty_boppers_2,littles,"""5-7""",5,6,60,12,,,
+bitty_boppers_1,bittyboppers,"""5-7""",5,6,60,12,,,
+bitty_boppers_2,bittyboppers,"""5-7""",5,6,60,12,,,
 contemporary_12plus,contemporary,"""12+""",12,18,60,20,,,
-contemporary_6to9_1,contemporary,"""6-8""",6,9,60,20,,,
-contemporary_6to9_2,contemporary,"""6-8""",6,9,60,20,,,
+contemporary_6to9_1,contemporary,"""6-9""",6,9,60,20,,,
+contemporary_6to9_2,contemporary,"""6-9""",6,9,60,20,,,
 contemporary_9to12,contemporary,"""9-12""",9,12,60,20,,,
 acro,acro,"""9-12""",8,18,60,20,,,
 hiphop_12plus,hiphop,"""12+""",12,18,60,20,,,
@@ -28,7 +28,7 @@ kindergarten_ballet,ballet,"""5-7""",5,6,45,20,,,
 kindergarten_jazz_1,jazz,"""5-7""",5,6,45,20,,,
 kindergarten_jazz_2,jazz,"""5-7""",5,6,45,20,,,
 kindergarten_jazz_ballet,jazz,"""5-7""",5,6,60,20,,,
-tap_6to9,tap,"""6-8""",6,9,60,20,,,
+tap_6to9,tap,"""6-9""",6,9,60,20,,,
 tap_9plus_1,tap,"""9-12""",9,18,60,20,,,
 tap_9plus_2,tap,"""9-12""",9,18,60,20,,,
 tiny_dancers_1,tinydancers,"""3-4""",3,4,45,10,,,
@@ -51,7 +51,7 @@ tiny_tots_6,tinytots,"""2""",2,3,30,10,,,
 tiny_tots_7,tinytots,"""2""",2,3,30,10,,,
 tippy_toes,tippytoes,"""5-7""",4,6,60,10,,,
 tiny_tumblers,acro,"""3-4""",3,4,45,10,,,
-first_steps,,"""baby""",1,2,30,20,,,
+first_steps,littles,"""baby""",1,2,30,20,,,
 strength_flex,conditioning,,12,18,50,20,,,
 ballet_adv_senior,ballet,,16,18,90,20,Qs,Monday-16:00,1
 stretch_strength_b,conditioning,,,,55,20,Kristian,Monday-17:35,1
@@ -84,8 +84,8 @@ ballet_adv_jr,ballet,,12,14,85,20,Meredith,Thursday-17:35,3
 pointe,pointe,,14,18,60,20,Meredith,Thursday-19:00,3
 jazz_adv_pet,jazz,,6,8,75,20,Katie,Monday-16:00,4
 ballet_adv_pet,ballet,,6,8,70,20,Amanda,Monday-17:15,4
-sidekicks1,sidekicks,,,,60,20,EmilyJ/Hayley,Wednesday-16:30,4
-sidekicks2,sidekicks,,,,60,20,EmilyJ/Hayley,Wednesday-17:30,4
+sidekicks1,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-16:30,4
+sidekicks2,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-17:30,4
 ,,,,,,,,,
 ,,,,,,,,,
 ,,,,,,,,,

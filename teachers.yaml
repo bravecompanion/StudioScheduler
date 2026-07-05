@@ -362,7 +362,7 @@ Cameron:
 Ben:
   avail_days:
     - WED
-    - THURS
+    - THU
   avail_start: 15:30
   avail_end: 21:00
   days_requested: 2
@@ -385,8 +385,8 @@ Shelby:
   avail_days:
     - WED
   avail_start: 15:30
-  avail_end: 19:30
-  days_requested: 2
+  avail_end: 19:50
+  days_requested: 1
   love_class:
     - jazz
     - contemporary
@@ -423,7 +423,7 @@ Qs:
   avail_days:
     - MON
     - TUE
-  avail_start: 17:00
+  avail_start: 16:00
   avail_end: 21:00
   days_requested: 2
   love_class:
