@@ -133,8 +133,8 @@ class StudioSchedulerModel:
 
     def _penalize_late_young_classes(self):
         """Soft Constraint: Push younger age groups to earlier time slots (Piecewise Step)."""
-        # Target cutoff time: 17:00 (5:00 PM). This is 90 mins after open (15:30).
-        target_mins_after_open = 90
+        # Target cutoff time: 17:30 (5:30 PM). This is 105 mins after open.
+        target_mins_after_open = 120
         target_epoch = target_mins_after_open // self.cal.epoch_minutes
         
         for c in self.classes:
@@ -142,9 +142,9 @@ class StudioSchedulerModel:
             
             weight = max(0, 18 - c.age_min)
             if weight > 0:
-                start_var = self.class_vars[c.id]['start']
+                end_var = self.class_vars[c.id]['end']
                 epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'epoch_in_day_{c.id}')
-                self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
+                self.model.AddModuloEquality(epoch_in_day, end_var, self.cal.day_offset)
                 
                 # Piecewise Linear: 0 penalty before target, linearly scaling penalty after target
                 late_epochs = self.model.NewIntVar(0, self.cal.day_offset, f'late_epochs_{c.id}')
