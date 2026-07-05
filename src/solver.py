@@ -161,6 +161,7 @@ class StudioSchedulerModel:
     def add_soft_constraints(self):
         self._penalize_late_young_classes()
         self._penalize_session_clustering()
+        self._penalize_session_time_clustering()
         self._penalize_teacher_schedule_span()
         self._penalize_teacher_days_requested()
         
@@ -232,6 +233,42 @@ class StudioSchedulerModel:
                 
                 # Multiply by a solid weight to heavily prioritize spreading them out
                 self.penalties.append(count_sq * CLUSTER_PENALTY)
+
+    def _penalize_session_time_clustering(self):
+        """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
+        import re
+        class_groups = {}
+        for c in self.classes:
+            base_name = re.sub(r'_\d+$', '', c.id)
+            if base_name not in class_groups:
+                class_groups[base_name] = []
+            class_groups[base_name].append(c)
+            
+        for base_name, class_list in class_groups.items():
+            if len(class_list) < 2:
+                continue
+                
+            for e_idx in range(self.day_duration_epochs):
+                sessions_at_this_time = []
+                for c in class_list:
+                    if c.id not in self.class_vars: continue
+                    
+                    start_var = self.class_vars[c.id]['start']
+                    epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'time_cluster_epoch_{c.id}_{e_idx}')
+                    self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
+                    
+                    is_at_time = self.model.NewBoolVar(f'is_at_time_{e_idx}_{c.id}')
+                    self.model.Add(epoch_in_day == e_idx).OnlyEnforceIf(is_at_time)
+                    self.model.Add(epoch_in_day != e_idx).OnlyEnforceIf(is_at_time.Not())
+                    sessions_at_this_time.append(is_at_time)
+                    
+                count = self.model.NewIntVar(0, len(class_list), f'time_count_{base_name}_{e_idx}')
+                self.model.Add(count == sum(sessions_at_this_time))
+                
+                count_sq = self.model.NewIntVar(0, len(class_list) ** 2, f'time_count_sq_{base_name}_{e_idx}')
+                self.model.AddMultiplicationEquality(count_sq, [count, count])
+                
+                self.penalties.append(count_sq * 50)
 
     def _penalize_teacher_schedule_span(self):
         """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
