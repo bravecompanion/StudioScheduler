@@ -164,6 +164,7 @@ class StudioSchedulerModel:
         self._penalize_session_time_clustering()
         self._penalize_teacher_schedule_span()
         self._penalize_teacher_days_requested()
+        self._reward_cohort_bunching()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -191,7 +192,7 @@ class StudioSchedulerModel:
 
     def _penalize_session_clustering(self):
         """Soft Constraint: Diversify the days on which multiple sessions of the same class are offered."""
-        CLUSTER_PENALTY = 75
+        PENALTY_MULT = 100
 
         # Group classes by base name
         base_class_groups = defaultdict(list)
@@ -232,10 +233,12 @@ class StudioSchedulerModel:
                 self.model.AddMultiplicationEquality(count_sq, [count_on_day, count_on_day])
                 
                 # Multiply by a solid weight to heavily prioritize spreading them out
-                self.penalties.append(count_sq * CLUSTER_PENALTY)
+                self.penalties.append(count_sq * PENALTY_MULT)
 
     def _penalize_session_time_clustering(self):
         """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
+        PENALTY_MULT = 100
+
         import re
         class_groups = {}
         for c in self.classes:
@@ -268,7 +271,7 @@ class StudioSchedulerModel:
                 count_sq = self.model.NewIntVar(0, len(class_list) ** 2, f'time_count_sq_{base_name}_{e_idx}')
                 self.model.AddMultiplicationEquality(count_sq, [count, count])
                 
-                self.penalties.append(count_sq * 50)
+                self.penalties.append(count_sq * PENALTY_MULT)
 
     def _penalize_teacher_schedule_span(self):
         """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
@@ -368,6 +371,53 @@ class StudioSchedulerModel:
             self.model.AddMaxEquality(abs_diff, [diff1, diff2])
             
             self.penalties.append(abs_diff * 10000)
+
+    def _reward_cohort_bunching(self):
+        """Soft Constraint: Reward sequencing classes of the same cohort but different styles with small/no gaps."""
+        cohort_groups = {}
+        for c in self.classes:
+            if not c.cohort:
+                continue
+            if c.cohort not in cohort_groups:
+                cohort_groups[c.cohort] = []
+            cohort_groups[c.cohort].append(c)
+            
+        for cohort, class_list in cohort_groups.items():
+            for i in range(len(class_list)):
+                for j in range(i + 1, len(class_list)):
+                    c1 = class_list[i]
+                    c2 = class_list[j]
+                    
+                    if c1.id not in self.class_vars or c2.id not in self.class_vars:
+                        continue
+                        
+                    # Only reward pairs of different styles
+                    if c1.style == c2.style:
+                        continue
+                        
+                    # Tier 1 Reward: 0-15 minutes gap (0-3 epochs)
+                    b2b_1_to_2 = self.model.NewBoolVar(f'b2b_t1_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] >= 0).OnlyEnforceIf(b2b_1_to_2)
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] <= 3).OnlyEnforceIf(b2b_1_to_2)
+                    
+                    b2b_2_to_1 = self.model.NewBoolVar(f'b2b_t1_{c2.id}_{c1.id}')
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] >= 0).OnlyEnforceIf(b2b_2_to_1)
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] <= 3).OnlyEnforceIf(b2b_2_to_1)
+                    
+                    # Tier 2 Reward: 20-30 minutes gap (4-6 epochs)
+                    close_1_to_2 = self.model.NewBoolVar(f'b2b_t2_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] >= 4).OnlyEnforceIf(close_1_to_2)
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] <= 6).OnlyEnforceIf(close_1_to_2)
+                    
+                    close_2_to_1 = self.model.NewBoolVar(f'b2b_t2_{c2.id}_{c1.id}')
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] >= 4).OnlyEnforceIf(close_2_to_1)
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] <= 6).OnlyEnforceIf(close_2_to_1)
+                    
+                    # Add negative penalties (rewards)
+                    self.penalties.append(b2b_1_to_2 * -30)
+                    self.penalties.append(b2b_2_to_1 * -30)
+                    self.penalties.append(close_1_to_2 * -15)
+                    self.penalties.append(close_2_to_1 * -15)
 
     def validate_inputs(self):
         """Sanity checker that runs before the CP-SAT engine to find impossible constraints."""
