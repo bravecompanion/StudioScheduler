@@ -73,23 +73,38 @@
 </head>
 <body>
 
-  <div id="controls">
-    <label for="viewToggle"><strong>Group Schedule By:</strong></label>
-    <select id="viewToggle" class="form-select w-auto">
-      <option value="rooms">Rooms (Check Double Bookings)</option>
-      <option value="teachers">Teachers (Check Instructor Gaps)</option>
-    </select>
+  <div class="row">
+    <div class="col-md-9">
+      <div id="controls">
+        <label for="viewToggle"><strong>Group Schedule By:</strong></label>
+        <select id="viewToggle" class="form-select w-auto">
+          <option value="rooms">Rooms (Check Double Bookings)</option>
+          <option value="teachers">Teachers (Check Instructor Gaps)</option>
+        </select>
 
-    <label for="colorToggle" class="ms-3"><strong>Color By:</strong></label>
-    <select id="colorToggle" class="form-select w-auto">
-      <option value="cohort">Cohort</option>
-      <option value="style">Style</option>
-      <option value="room">Room</option>
-      <option value="teacher">Teacher</option>
-    </select>
+        <label for="colorToggle" class="ms-3"><strong>Color By:</strong></label>
+        <select id="colorToggle" class="form-select w-auto">
+          <option value="cohort">Cohort</option>
+          <option value="style">Style</option>
+          <option value="room">Room</option>
+          <option value="teacher">Teacher</option>
+        </select>
+      </div>
+
+      <div id="calendar"></div>
+    </div>
+    
+    <div class="col-md-3">
+      <div id="filter-panel" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-height: 800px; overflow-y: auto;">
+        <h5>Class Filters</h5>
+        <div class="mb-3">
+          <button id="selectAllBtn" class="btn btn-sm btn-outline-primary">Select All</button>
+          <button id="deselectAllBtn" class="btn btn-sm btn-outline-secondary">Deselect All</button>
+        </div>
+        <div id="checkboxContainer"></div>
+      </div>
+    </div>
   </div>
-
-  <div id="calendar"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
@@ -144,8 +159,17 @@
           return dimensionMaps[colorDim].get(val) || '#3788d8';
       }
 
+      function getBaseClass(eventId) {
+          return eventId.replace(/_\d+$/, '');
+      }
+
+      const baseClasses = [...new Set(data.events.map(e => getBaseClass(e.id)))].sort();
+      window.visibleBaseClasses = new Set(baseClasses);
+
       function getMappedEvents(dimension, colorDimension) {
-        return data.events.map(event => {
+        return data.events
+          .filter(event => window.visibleBaseClasses.has(getBaseClass(event.id)))
+          .map(event => {
           const color = getColorForEvent(event, colorDimension);
           
           const classNames = [];
@@ -224,6 +248,47 @@
       document.getElementById('colorToggle').addEventListener('change', function(e) {
         currentColorDimension = e.target.value;
         updateCalendar();
+      });
+
+      // Filter Logic
+      const classCounts = {};
+      data.events.forEach(e => {
+          const bc = getBaseClass(e.id);
+          classCounts[bc] = (classCounts[bc] || 0) + 1;
+      });
+
+      const checkboxContainer = document.getElementById('checkboxContainer');
+      baseClasses.forEach(bc => {
+          const div = document.createElement('div');
+          div.className = 'form-check';
+          div.innerHTML = `
+              <input class="form-check-input class-filter-cb" type="checkbox" value="${bc}" id="cb_${bc}" checked>
+              <label class="form-check-label" for="cb_${bc}">${bc} (${classCounts[bc]})</label>
+          `;
+          checkboxContainer.appendChild(div);
+      });
+      
+      checkboxContainer.addEventListener('change', function(e) {
+          if (e.target.classList.contains('class-filter-cb')) {
+              if (e.target.checked) {
+                  window.visibleBaseClasses.add(e.target.value);
+              } else {
+                  window.visibleBaseClasses.delete(e.target.value);
+              }
+              updateCalendar();
+          }
+      });
+      
+      document.getElementById('selectAllBtn').addEventListener('click', () => {
+          document.querySelectorAll('.class-filter-cb').forEach(cb => cb.checked = true);
+          baseClasses.forEach(bc => window.visibleBaseClasses.add(bc));
+          updateCalendar();
+      });
+      
+      document.getElementById('deselectAllBtn').addEventListener('click', () => {
+          document.querySelectorAll('.class-filter-cb').forEach(cb => cb.checked = false);
+          window.visibleBaseClasses.clear();
+          updateCalendar();
       });
     });
   </script>
