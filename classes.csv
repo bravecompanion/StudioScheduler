@@ -60,6 +60,7 @@ ballet_teal,ballet,,8,11,80,20,Braly,Tuesday-16:30,1
 ballet_purple,ballet,,12,15,90,20,Braly,Tuesday-19:15,1
 company_teen_sr,company,,14,18,85,20,EmilyJ/Cameron,Tuesday-17:50,1
 hiphop_adv_teen,hiphop,,12,14,55,20,Ben,Wednesday-16:00,1
+hiphop_adv_sr,hiphop,,12,14,55,20,Ben,Wednesday-16:55,2
 contemporary_adv_teen,contemporary,,12,14,55,20,Shelby,Wednesday-16:55,1
 hiphop_sidekicks,hiphop,,6,8,55,20,Ben,Wednesday-17:50,1
 hiphop_adv_junior,hiphop,,10,12,55,20,Ben,Wednesday-18:45,1
@@ -73,7 +74,8 @@ ballet_adv_mini,ballet,,8,10,85,20,Amanda,Monday-18:25,2
 pre_pointe,pointe,,,,60,20,Meredith,Tuesday-16:50,2
 company_mini_jr,company,,8,12,85,20,EmilyJ/Cameron,Tuesday-17:50,2
 ballet_yellow,ballet,,14,18,90,20,Meredith,Tuesday-19:15,2
-contemporary_adv_sr,contemporary,,16,18,55,20,Shelby,Wednesday-18:00,2
+contemporary_adv_sr,contemporary,,16,18,55,20,Shelby,Wednesday-16:00,2
+contemporary_adv_jr,contemporary,,16,18,55,20,Shelby,Wednesday-18:00,2
 contemporary_adv_mini,contemporary,,8,10,55,20,Shelby,Wednesday-18:55,2
 jazz_adv_teen,jazz,,12,14,90,20,Cameron,Thursday-17:00,2
 connections,connections,,,,60,20,Meredith/Courteney/HailleBell/Morganne/Stephanie ,Tuesday-17:00,3
@@ -86,10 +88,3 @@ jazz_adv_pet,jazz,,6,8,75,20,Katie,Monday-16:00,4
 ballet_adv_pet,ballet,,6,8,70,20,Amanda,Monday-17:15,4
 sidekicks1,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-16:30,4
 sidekicks2,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-17:30,4
-,,,,,,,,,
-,,,,,,,,,
-,,,,,,,,,
-,,,,,,,,,
-,,,,,,,,,
-,,,,,,,,,
- ,,,,,,,,,

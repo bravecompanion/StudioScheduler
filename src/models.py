@@ -12,6 +12,7 @@ class Teacher:
     avail_days: List[str]
     avail_start_epoch: Optional[int]
     avail_end_epoch: Optional[int]
+    days_requested: Optional[int] = None
 
 @dataclass
 class ClassSession:

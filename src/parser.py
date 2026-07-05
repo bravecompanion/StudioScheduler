@@ -4,22 +4,23 @@ import re
 from typing import List, Dict, Tuple
 from .models import Room, Teacher, ClassSession, StudioCalendar
 
-def time_to_epochs(time_str: str, cal: StudioCalendar) -> int:
-    """Converts a time string like '16:30' to epochs relative to the open time."""
-    if pd.isna(time_str) or not str(time_str).strip():
-        return None
-    # handle cases where time is float or int somehow
-    time_str = str(time_str).strip()
-    # Check for invalid formats
-    if ":" not in time_str:
+def time_to_epochs(time_str, cal: StudioCalendar) -> int:
+    if time_str is None or str(time_str).strip() == '':
         return None
         
-    h, m = map(int, time_str.split(':'))
     open_h, open_m = map(int, cal.open_time.split(':'))
-    
-    minutes_since_midnight = h * 60 + m
     open_minutes_since_midnight = open_h * 60 + open_m
     
+    if isinstance(time_str, int):
+        # PyYAML 1.1 automatically parses unquoted HH:MM as sexagesimal (minutes since midnight)
+        minutes_since_midnight = time_str
+    else:
+        time_str = str(time_str)
+        if ":" not in time_str:
+            return None
+        h, m = map(int, time_str.split(':'))
+        minutes_since_midnight = h * 60 + m
+        
     minutes_since_open = minutes_since_midnight - open_minutes_since_midnight
     return minutes_since_open // cal.epoch_minutes
 
@@ -73,7 +74,7 @@ def load_data(
         avail_start = time_to_epochs(t_data.get('avail_start', ''), cal)
         avail_end = time_to_epochs(t_data.get('avail_end', ''), cal)
         
-        # Handle EmilyJ placeholder parsing error gracefully
+        # Sanitize day string
         avail_days = t_data.get('avail_days', [])
         clean_days = [d.upper() for d in avail_days if isinstance(d, str) and not d.startswith('**')]
         
@@ -81,7 +82,8 @@ def load_data(
             id=t_id,
             avail_days=clean_days,
             avail_start_epoch=avail_start,
-            avail_end_epoch=avail_end
+            avail_end_epoch=avail_end,
+            days_requested=t_data.get('days_requested')
         ))
         
     # 3. Load Teacher Options (Routing table)
@@ -122,7 +124,7 @@ def load_data(
         
         # Find preferred teachers. Match exact style + cohort.
         pref_teachers = routing_table.get((style, cohort), [])
-        if not pref_teachers and cohort == "":
+        if not pref_teachers:
              pref_teachers = routing_table.get((style, "all"), [])
         
         if pd.isna(row['Duration']):

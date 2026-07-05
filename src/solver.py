@@ -117,6 +117,37 @@ class StudioSchedulerModel:
             if c.pinned_time_epoch is not None:
                 self.model.Add(c_vars['start'] == c.pinned_time_epoch)
                 
+            # Teacher Availability (Day of Week and Time)
+            start_var = c_vars['start']
+            epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'epoch_in_day_hard_{c.id}')
+            self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
+            
+            day_idx_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_hard_{c.id}')
+            self.model.AddDivisionEquality(day_idx_var, start_var, self.cal.day_offset)
+            
+            for t_id, presence in teacher_presences.items():
+                t = self.teacher_by_id[t_id]
+                
+                # Day of Week Availability
+                if getattr(t, 'avail_days', None):
+                    valid_day_indices = [i for i, d in enumerate(self.cal.days) if d in t.avail_days]
+                    invalid_day_indices = [i for i in range(len(self.cal.days)) if i not in valid_day_indices]
+                    
+                    for inv_idx in invalid_day_indices:
+                        is_invalid_day = self.model.NewBoolVar(f'inv_day_{c.id}_{t.id}_{inv_idx}')
+                        self.model.Add(day_idx_var == inv_idx).OnlyEnforceIf(is_invalid_day)
+                        self.model.Add(day_idx_var != inv_idx).OnlyEnforceIf(is_invalid_day.Not())
+                        
+                        # If the class falls on an invalid day, the teacher cannot be assigned to it.
+                        self.model.AddImplication(is_invalid_day, presence.Not())
+                        
+                # Time of Day Availability
+                if getattr(t, 'avail_start_epoch', None) is not None:
+                    self.model.Add(epoch_in_day >= t.avail_start_epoch).OnlyEnforceIf(presence)
+                    
+                if getattr(t, 'avail_end_epoch', None) is not None:
+                    self.model.Add(epoch_in_day + c.duration_epochs <= t.avail_end_epoch).OnlyEnforceIf(presence)
+                
         # NoOverlap for Rooms
         for r_id, intervals in self.room_intervals.items():
             if intervals:
@@ -130,6 +161,8 @@ class StudioSchedulerModel:
     def add_soft_constraints(self):
         self._penalize_late_young_classes()
         self._penalize_session_clustering()
+        self._penalize_teacher_schedule_span()
+        self._penalize_teacher_days_requested()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -170,18 +203,18 @@ class StudioSchedulerModel:
                 continue # No need to diversify a single session
                 
             # Create a day variable for each session
-            class_day_vars = {}
             for c in class_list:
                 start_var = self.class_vars[c.id]['start']
                 day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_{c.id}')
                 self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
-                class_day_vars[c.id] = day_var
                 
             # For each day, count how many sessions land on it
             for d_idx, day_str in enumerate(self.cal.days):
                 sessions_on_this_day = []
                 for c in class_list:
-                    day_var = class_day_vars[c.id]
+                    start_var = self.class_vars[c.id]['start']
+                    day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_{c.id}_{d_idx}')
+                    self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
                     is_on_day = self.model.NewBoolVar(f'is_on_{day_str}_{c.id}')
                     self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
                     self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
@@ -198,7 +231,192 @@ class StudioSchedulerModel:
                 # Multiply by a solid weight to heavily prioritize spreading them out
                 self.penalties.append(count_sq * 50)
 
+    def _penalize_teacher_schedule_span(self):
+        """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
+        for t in self.teachers:
+            if not self.teacher_intervals[t.id]: continue
+                
+            for d_idx, day_str in enumerate(self.cal.days):
+                day_base = d_idx * self.cal.day_offset
+                day_end = day_base + self.day_duration_epochs
+                
+                starts = []
+                ends = []
+                
+                for c in self.classes:
+                    if c.id not in self.class_vars: continue
+                    if t.id not in self.class_vars[c.id]['teacher_presences']: continue
+                    
+                    presence = self.class_vars[c.id]['teacher_presences'][t.id]
+                    start_var = self.class_vars[c.id]['start']
+                    end_var = self.class_vars[c.id]['end']
+                    
+                    day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'span_day_idx_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                    
+                    is_on_day = self.model.NewBoolVar(f'span_is_on_day_{d_idx}_{c.id}_{t.id}')
+                    self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                    self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                    
+                    is_active_class = self.model.NewBoolVar(f'span_is_active_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddBoolAnd([presence, is_on_day]).OnlyEnforceIf(is_active_class)
+                    self.model.AddBoolOr([presence.Not(), is_on_day.Not()]).OnlyEnforceIf(is_active_class.Not())
+                    
+                    safe_start = self.model.NewIntVar(0, self.cal.day_offset * len(self.cal.days), f'safe_start_{c.id}_{t.id}_{d_idx}')
+                    self.model.Add(safe_start == start_var).OnlyEnforceIf(is_active_class)
+                    self.model.Add(safe_start == day_end).OnlyEnforceIf(is_active_class.Not())
+                    
+                    safe_end = self.model.NewIntVar(0, self.cal.day_offset * len(self.cal.days), f'safe_end_{c.id}_{t.id}_{d_idx}')
+                    self.model.Add(safe_end == end_var).OnlyEnforceIf(is_active_class)
+                    self.model.Add(safe_end == day_base).OnlyEnforceIf(is_active_class.Not())
+                    
+                    starts.append(safe_start)
+                    ends.append(safe_end)
+                    
+                if not starts: continue
+                    
+                min_start = self.model.NewIntVar(0, self.cal.day_offset * len(self.cal.days), f'min_start_{t.id}_{d_idx}')
+                max_end = self.model.NewIntVar(0, self.cal.day_offset * len(self.cal.days), f'max_end_{t.id}_{d_idx}')
+                self.model.AddMinEquality(min_start, starts)
+                self.model.AddMaxEquality(max_end, ends)
+                
+                span = self.model.NewIntVar(0, self.day_duration_epochs, f'span_{t.id}_{d_idx}')
+                self.model.AddMaxEquality(span, [0, max_end - min_start])
+                self.penalties.append(span * 10)
+
+    def _penalize_teacher_days_requested(self):
+        """Soft Constraint: Penalize if a teacher is active on more or fewer days than they requested."""
+        for t in self.teachers:
+            if not getattr(t, 'days_requested', None): continue
+                
+            active_days = []
+            for d_idx, day_str in enumerate(self.cal.days):
+                classes_on_day = []
+                for c in self.classes:
+                    if c.id not in self.class_vars: continue
+                    if t.id not in self.class_vars[c.id]['teacher_presences']: continue
+                    
+                    presence = self.class_vars[c.id]['teacher_presences'][t.id]
+                    start_var = self.class_vars[c.id]['start']
+                    
+                    day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'req_day_idx_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                    
+                    is_on_day = self.model.NewBoolVar(f'req_is_on_day_{d_idx}_{c.id}_{t.id}')
+                    self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                    self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                    
+                    is_active_class = self.model.NewBoolVar(f'req_is_active_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddBoolAnd([presence, is_on_day]).OnlyEnforceIf(is_active_class)
+                    self.model.AddBoolOr([presence.Not(), is_on_day.Not()]).OnlyEnforceIf(is_active_class.Not())
+                    
+                    classes_on_day.append(is_active_class)
+                    
+                is_active_on_day = self.model.NewBoolVar(f'active_on_day_{t.id}_{d_idx}')
+                if classes_on_day:
+                    self.model.AddMaxEquality(is_active_on_day, classes_on_day)
+                else:
+                    self.model.Add(is_active_on_day == 0)
+                    
+                active_days.append(is_active_on_day)
+                
+            total_active = self.model.NewIntVar(0, len(self.cal.days), f'total_active_days_{t.id}')
+            self.model.Add(total_active == sum(active_days))
+            
+            diff1 = total_active - t.days_requested
+            diff2 = t.days_requested - total_active
+            abs_diff = self.model.NewIntVar(0, len(self.cal.days), f'abs_diff_{t.id}')
+            self.model.AddMaxEquality(abs_diff, [diff1, diff2])
+            
+            self.penalties.append(abs_diff * 10000)
+
+    def validate_inputs(self):
+        """Sanity checker that runs before the CP-SAT engine to find impossible constraints."""
+        import sys
+        errors = []
+        
+        def to_time(epoch_in_day):
+            open_h, open_m = map(int, self.cal.open_time.split(':'))
+            minutes_since_open = epoch_in_day * self.cal.epoch_minutes
+            total_minutes = open_h * 60 + open_m + minutes_since_open
+            h = total_minutes // 60
+            m = total_minutes % 60
+            period = "PM" if h >= 12 else "AM"
+            h_12 = h - 12 if h > 12 else h
+            h_12 = 12 if h_12 == 0 else h_12
+            return f"{h_12}:{m:02d} {period}"
+            
+        teacher_pinned_times = {}
+        room_pinned_times = {}
+        
+        for c in self.classes:
+            valid_t = [t for t in self.teachers if t.id in (c.preferred_teachers or []) or t.id == c.pinned_teacher]
+            if not valid_t:
+                errors.append(f"Class '{c.id}' has no valid teachers assigned (not in preferred list, and no pinned teacher).")
+                
+            if c.pinned_teacher and c.pinned_time_epoch is not None:
+                t = self.teacher_by_id.get(c.pinned_teacher)
+                if not t:
+                    errors.append(f"Class '{c.id}' is pinned to unknown teacher '{c.pinned_teacher}'.")
+                    continue
+                    
+                day_idx = c.pinned_time_epoch // self.cal.day_offset
+                day_str = self.cal.days[day_idx]
+                epoch_in_day = c.pinned_time_epoch % self.cal.day_offset
+                
+                if getattr(t, 'avail_days', None) and day_str not in t.avail_days:
+                    errors.append(f"Class '{c.id}' is pinned to {day_str}, but Teacher '{t.id}' does not work on {day_str}. (Available: {', '.join(t.avail_days)})")
+                    
+                if getattr(t, 'avail_start_epoch', None) is not None and epoch_in_day < t.avail_start_epoch:
+                    errors.append(f"Class '{c.id}' is pinned to start at {to_time(epoch_in_day)}, but Teacher '{t.id}' does not start until {to_time(t.avail_start_epoch)}.")
+                    
+                if getattr(t, 'avail_end_epoch', None) is not None and (epoch_in_day + c.duration_epochs) > t.avail_end_epoch:
+                    errors.append(f"Class '{c.id}' ends at {to_time(epoch_in_day + c.duration_epochs)}, but Teacher '{t.id}' leaves at {to_time(t.avail_end_epoch)}.")
+                    
+                c_start = c.pinned_time_epoch
+                c_end = c.pinned_time_epoch + c.duration_epochs
+                if t.id not in teacher_pinned_times:
+                    teacher_pinned_times[t.id] = []
+                    
+                for other_start, other_end, other_c in teacher_pinned_times[t.id]:
+                    if max(c_start, other_start) < min(c_end, other_end):
+                        errors.append(f"Teacher '{t.id}' is double-booked! Class '{c.id}' overlaps with Class '{other_c}'.")
+                        
+                teacher_pinned_times[t.id].append((c_start, c_end, c.id))
+                
+            if getattr(c, 'pinned_room', None) and c.pinned_time_epoch is not None:
+                r_id = str(c.pinned_room).strip()
+                r = next((rm for rm in self.rooms if rm.id == r_id), None)
+                if not r:
+                    errors.append(f"Class '{c.id}' is pinned to unknown room '{r_id}'.")
+                else:
+                    if getattr(c, 'size', 0) > r.capacity:
+                        errors.append(f"Class '{c.id}' (size {c.size}) is pinned to Room '{r_id}', which only holds {r.capacity}.")
+                    
+                    c_start = c.pinned_time_epoch
+                    c_end = c.pinned_time_epoch + c.duration_epochs
+                    if r_id not in room_pinned_times:
+                        room_pinned_times[r_id] = []
+                        
+                    for other_start, other_end, other_c in room_pinned_times[r_id]:
+                        if max(c_start, other_start) < min(c_end, other_end):
+                            errors.append(f"Room '{r_id}' is double-booked! Class '{c.id}' overlaps with Class '{other_c}'.")
+                            
+                    room_pinned_times[r_id].append((c_start, c_end, c.id))
+                
+        if errors:
+            print("\n" + "="*80)
+            print("🚨 PRE-SOLVER VALIDATION FAILED! 🚨")
+            print("The following hard constraints are physically impossible:\n")
+            for e in errors:
+                print(f"❌ {e}")
+            print("="*80 + "\n")
+            print("Please fix these errors in classes.csv or teachers.yaml and try again.")
+            sys.exit(1)
+
     def solve(self):
+        self.validate_inputs()
+        
         solver = cp_model.CpSolver()
         solver.parameters.log_search_progress = True
         solver.parameters.max_time_in_seconds = 60.0
