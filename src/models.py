@@ -9,9 +9,7 @@ class Room:
 @dataclass
 class Teacher:
     id: str
-    avail_days: List[str]
-    avail_start_epoch: Optional[int]
-    avail_end_epoch: Optional[int]
+    availability: Dict[str, Dict[str, Optional[int]]]
     days_requested: Optional[int] = None
 
 @dataclass
@@ -27,6 +25,9 @@ class ClassSession:
     pinned_room: Optional[str] = None
     age_min: int = 20
     age_max: int = 20
+    allowed_days: Optional[List[str]] = None
+    earliest_start_epoch: Optional[int] = None
+    latest_end_epoch: Optional[int] = None
 
 @dataclass
 class StudioCalendar:

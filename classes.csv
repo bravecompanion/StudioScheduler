@@ -1,92 +1,92 @@
-ClassName,Style,Cohort,AgeMin,AgeMax,Duration,Size,PinTeacher,PinTime,PinRoom
-ballet_12plus,ballet,"""12+""",12,18,60,20,,,
-ballet_9_12_1,ballet,"""9-12""",9,12,60,20,,,
-ballet_9_12_2,ballet,"""9-12""",9,12,60,20,,,
-ballet_6to8_1,ballet,"""6-8""",6,8,60,20,,,
-ballet_6to8_2,ballet,"""6-8""",6,8,60,20,,,
-ballet_6to8_3,ballet,"""6-8""",6,8,60,20,,,
-bitty_boppers_1,bittyboppers,"""5-7""",5,6,60,12,,,
-bitty_boppers_2,bittyboppers,"""5-7""",5,6,60,12,,,
-contemporary_12plus,contemporary,"""12+""",12,18,60,20,,,
-contemporary_6to9_1,contemporary,"""6-9""",6,9,60,20,,,
-contemporary_6to9_2,contemporary,"""6-9""",6,9,60,20,,,
-contemporary_9to12,contemporary,"""9-12""",9,12,60,20,,,
-acro,acro,"""9-18""",9,18,60,20,,,
-hiphop_12plus,hiphop,"""12+""",12,18,60,20,,,
-hiphop_6to8_1,hiphop,"""6-8""",6,8,60,20,,,
-hiphop_6to8_2,hiphop,"""6-8""",6,8,60,20,,,
-hiphop_6to8_3,hiphop,"""6-8""",6,8,60,20,,,
-hiphop_6to8_4,hiphop,"""6-8""",6,8,60,20,,,
-hiphop_9to12_1,hiphop,"""9-12""",9,12,60,20,,,
-hiphop_9to12_2,hiphop,"""9-12""",9,12,60,20,,,
-jazz_12plus,jazz,"""12+""",12,18,60,20,,,
-jazz_6to8_1,jazz,"""6-8""",6,8,60,20,,,
-jazz_6to8_2,jazz,"""6-8""",6,8,60,20,,,
-jazz_6to8_3,jazz,"""6-8""",6,8,60,20,,,
-jazz_6to8_4,jazz,"""6-8""",6,8,60,20,,,
-jazz_9to12_1,jazz,"""9-12""",9,12,60,20,,,
-jazz_9to12_2,jazz,"""9-12""",9,12,60,20,,,
-kindergarten_ballet,ballet,"""5-7""",5,6,45,20,,,
-kindergarten_jazz_1,jazz,"""5-7""",5,6,45,20,,,
-kindergarten_jazz_2,jazz,"""5-7""",5,6,45,20,,,
-kindergarten_jazz_ballet,jazz,"""5-7""",5,6,60,20,,,
-tap_6to9,tap,"""6-9""",6,9,60,20,,,
-tap_9plus_1,tap,"""9-12""",9,18,60,20,,,
-tap_9plus_2,tap,"""9-12""",9,18,60,20,,,
-tiny_dancers_1,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_2,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_3,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_4,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_5,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_6,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_7,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_8,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_9,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_10,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_dancers_11,tinydancers,"""3-4""",3,4,45,10,,,
-tiny_tots_1,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_2,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_3,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_4,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_5,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_6,tinytots,"""2""",2,3,30,10,,,
-tiny_tots_7,tinytots,"""2""",2,3,30,10,,,
-tippy_toes,tippytoes,"""5-7""",4,6,60,10,,,
-tiny_tumblers,acro,"""3-4""",3,4,45,10,,,
-first_steps,littles,"""baby""",1,2,30,20,,,
-strength_flex,conditioning,,12,18,50,20,,,
-ballet_adv_senior,ballet,,16,18,90,20,Qs,Monday-16:00,1
-stretch_strength_b,conditioning,,,,55,20,Kristian,Monday-17:35,1
-jazz_adv_senior,jazz,,16,18,90,20,Cameron,Monday-18:30,1
-ballet_teal,ballet,,8,11,80,20,Braly,Tuesday-16:30,1
-ballet_purple,ballet,,12,15,90,20,Braly,Tuesday-19:15,1
-company_teen_sr,company,,14,18,85,20,EmilyJ/Cameron,Tuesday-17:50,1
-hiphop_adv_teen,hiphop,,12,14,55,20,Ben,Wednesday-16:00,1
-hiphop_adv_sr,hiphop,,12,14,55,20,Ben,Wednesday-16:55,2
-contemporary_adv_teen,contemporary,,12,14,55,20,Shelby,Wednesday-16:55,1
-hiphop_sidekicks,hiphop,,6,8,55,20,Ben,Wednesday-17:50,1
-hiphop_adv_junior,hiphop,,10,12,55,20,Ben,Wednesday-18:45,1
-tap_adv_junior,tap,,10,12,55,20,Ben,Wednesday-19:40,1
-tap_adv_teen_senior,tap,,13,18,60,20,Ben,Thursday-16:00,1
-hiphop_adv_mini,hiphop,,8,10,60,20,Ben,Thursday-17:00,1
-tap_adv_mini,tap,,8,10,60,20,Ben,Thursday-18:00,1
-stretch_strength_a,conditioning,,,,45,20,Kristian/Cameron,Thursday-19:00,1
-jazz_adv_mini,jazz,,8,10,85,20,EmilyJ,Monday-17:00,2
-ballet_adv_mini,ballet,,8,10,85,20,Amanda,Monday-18:25,2
-pre_pointe,pointe,,,,60,20,Meredith,Tuesday-16:50,2
-company_mini_jr,company,,8,12,85,20,EmilyJ/Cameron,Tuesday-17:50,2
-ballet_yellow,ballet,,14,18,90,20,Meredith,Tuesday-19:15,2
-contemporary_adv_sr,contemporary,,16,18,55,20,Shelby,Wednesday-16:00,2
-contemporary_adv_jr,contemporary,,16,18,55,20,Shelby,Wednesday-18:00,2
-contemporary_adv_mini,contemporary,,8,10,55,20,Shelby,Wednesday-18:55,2
-jazz_adv_teen,jazz,,12,14,90,20,Cameron,Thursday-17:00,2
-connections,connections,,,,60,20,Meredith/Courteney/HailleBell/Morganne/Stephanie ,Tuesday-17:00,3
-ballet_green,ballet,,8,10,90,20,Braly,Wednesday-16:30,3
-ballet_adv_teen,ballet,,14,16,90,20,Braly,Wednesday-18:00,3
-jazz_adv_jr,jazz,,12,14,85,20,EmilyJ,Thursday-16:00,3
-ballet_adv_jr,ballet,,12,14,85,20,Meredith,Thursday-17:35,3
-pointe,pointe,,14,18,60,20,Meredith,Thursday-19:00,3
-jazz_adv_pet,jazz,,6,8,75,20,Katie,Monday-16:00,4
-ballet_adv_pet,ballet,,6,8,70,20,Amanda,Monday-17:15,4
-sidekicks2,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-16:30,4
-sidekicks1,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-17:30,4
+ClassName,Style,Cohort,AgeMin,AgeMax,Duration,Size,PinTeacher,PinTime,PinRoom,AllowedDays,EarliestStart,LatestEnd
+ballet_12plus,ballet,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+ballet_9_12_1,ballet,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+ballet_9_12_2,ballet,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+ballet_6to8_1,ballet,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+ballet_6to8_2,ballet,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+ballet_6to8_3,ballet,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+bitty_boppers_1,bittyboppers,"""5-7""",5,6,60,12,,,,,03:30:00 PM,07:00:00 PM
+bitty_boppers_2,bittyboppers,"""5-7""",5,6,60,12,,,,,03:30:00 PM,07:00:00 PM
+contemporary_12plus,contemporary,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+contemporary_6to9_1,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+contemporary_6to9_2,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+contemporary_9to12,contemporary,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+acro,acro,"""9-18""",9,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+hiphop_12plus,hiphop,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+hiphop_6to8_1,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+hiphop_6to8_2,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+hiphop_6to8_3,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+hiphop_6to8_4,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+hiphop_9to12_1,hiphop,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+hiphop_9to12_2,hiphop,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+jazz_12plus,jazz,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+jazz_6to8_1,jazz,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+jazz_6to8_2,jazz,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+jazz_6to8_3,jazz,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+jazz_6to8_4,jazz,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
+jazz_9to12_1,jazz,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+jazz_9to12_2,jazz,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
+kindergarten_ballet,ballet,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
+kindergarten_jazz_1,jazz,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
+kindergarten_jazz_2,jazz,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
+kindergarten_jazz_ballet,jazz,"""5-7""",5,6,60,20,,,,,03:30:00 PM,07:00:00 PM
+tap_6to9,tap,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+tap_9plus_1,tap,"""9-12""",9,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+tap_9plus_2,tap,"""9-12""",9,18,60,20,,,,,04:00:00 PM,08:30:00 PM
+tiny_dancers_1,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_2,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_3,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_4,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_5,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_6,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_7,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_8,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_9,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_10,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_dancers_11,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
+tiny_tots_1,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_2,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_3,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_4,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_5,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_6,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tiny_tots_7,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
+tippy_toes,tippytoes,"""5-7""",4,6,60,10,,,,,03:30:00 PM,07:00:00 PM
+tiny_tumblers,acro,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:00:00 PM
+first_steps,littles,"""baby""",1,2,30,20,,,,WED,04:00:00 PM,05:30:00 PM
+strength_flex,conditioning,,12,18,50,20,,,,,04:00:00 PM,09:00:00 PM
+ballet_adv_senior,ballet,,16,18,90,20,Qs,Monday-16:00,1,,,
+stretch_strength_b,conditioning,,,,55,20,Kristian,Monday-17:35,1,,,
+jazz_adv_senior,jazz,,16,18,90,20,Cameron,Monday-18:30,1,,,
+ballet_teal,ballet,,8,11,80,20,Braly,Tuesday-16:30,1,,,
+ballet_purple,ballet,,12,15,90,20,Braly,Tuesday-19:15,1,,,
+company_teen_sr,company,,14,18,85,20,EmilyJ/Cameron,Tuesday-17:50,1,,,
+hiphop_adv_teen,hiphop,,12,14,55,20,Ben,Wednesday-16:00,1,,,
+hiphop_adv_sr,hiphop,,12,14,55,20,Ben,Wednesday-16:55,2,,,
+contemporary_adv_teen,contemporary,,12,14,55,20,Shelby,Wednesday-16:55,1,,,
+hiphop_sidekicks,hiphop,,6,8,55,20,Ben,Wednesday-17:50,1,,,
+hiphop_adv_junior,hiphop,,10,12,55,20,Ben,Wednesday-18:45,1,,,
+tap_adv_junior,tap,,10,12,55,20,Ben,Wednesday-19:40,1,,,
+tap_adv_teen_senior,tap,,13,18,60,20,Ben,Thursday-16:00,1,,,
+hiphop_adv_mini,hiphop,,8,10,60,20,Ben,Thursday-17:00,1,,,
+tap_adv_mini,tap,,8,10,60,20,Ben,Thursday-18:00,1,,,
+stretch_strength_a,conditioning,,,,45,20,Kristian/Cameron,Thursday-19:00,1,,,
+jazz_adv_mini,jazz,,8,10,85,20,EmilyJ,Monday-17:00,2,,,
+ballet_adv_mini,ballet,,8,10,85,20,Amanda,Monday-18:25,2,,,
+pre_pointe,pointe,,,,60,20,Meredith,Tuesday-16:50,2,,,
+company_mini_jr,company,,8,12,85,20,EmilyJ/Cameron,Tuesday-17:50,2,,,
+ballet_yellow,ballet,,14,18,90,20,Meredith,Tuesday-19:15,2,,,
+contemporary_adv_sr,contemporary,,16,18,55,20,Shelby,Wednesday-16:00,2,,,
+contemporary_adv_jr,contemporary,,16,18,55,20,Shelby,Wednesday-18:00,2,,,
+contemporary_adv_mini,contemporary,,8,10,55,20,Shelby,Wednesday-18:55,2,,,
+jazz_adv_teen,jazz,,12,14,90,20,Cameron,Thursday-17:00,2,,,
+connections,connections,,,,60,20,Meredith/Courteney/HailleBell/Morganne/Stephanie ,Tuesday-17:00,3,,,
+ballet_green,ballet,,8,10,90,20,Braly,Wednesday-16:30,3,,,
+ballet_adv_teen,ballet,,14,16,90,20,Braly,Wednesday-18:00,3,,,
+jazz_adv_jr,jazz,,12,14,85,20,EmilyJ,Thursday-16:00,3,,,
+ballet_adv_jr,ballet,,12,14,85,20,Meredith,Thursday-17:35,3,,,
+pointe,pointe,,14,18,60,20,Meredith,Thursday-19:00,3,,,
+jazz_adv_pet,jazz,,6,8,75,20,Katie,Monday-16:00,4,,,
+ballet_adv_pet,ballet,,6,8,70,20,Amanda,Monday-17:15,4,,,
+sidekicks2,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-16:30,4,,,
+sidekicks1,sidekicks,,,,60,20,EmilyJ/HayleyTipton,Wednesday-17:30,4,,,

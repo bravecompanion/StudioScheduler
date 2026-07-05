@@ -15,10 +15,25 @@ def time_to_epochs(time_str, cal: StudioCalendar) -> int:
         # PyYAML 1.1 automatically parses unquoted HH:MM as sexagesimal (minutes since midnight)
         minutes_since_midnight = time_str
     else:
-        time_str = str(time_str)
+        time_str = str(time_str).strip().upper()
         if ":" not in time_str:
             return None
-        h, m = map(int, time_str.split(':'))
+            
+        is_pm = 'PM' in time_str
+        is_am = 'AM' in time_str
+        
+        # Remove AM/PM and trailing spaces
+        time_str = time_str.replace('PM', '').replace('AM', '').strip()
+        
+        parts = time_str.split(':')
+        h = int(parts[0])
+        m = int(parts[1])
+        
+        if is_pm and h < 12:
+            h += 12
+        if is_am and h == 12:
+            h = 0
+            
         minutes_since_midnight = h * 60 + m
         
     minutes_since_open = minutes_since_midnight - open_minutes_since_midnight
@@ -71,18 +86,19 @@ def load_data(
         if not isinstance(t_data, dict):
             continue
             
-        avail_start = time_to_epochs(t_data.get('avail_start', ''), cal)
-        avail_end = time_to_epochs(t_data.get('avail_end', ''), cal)
-        
-        # Sanitize day string
-        avail_days = t_data.get('avail_days', [])
-        clean_days = [d.upper() for d in avail_days if isinstance(d, str) and not d.startswith('**')]
+        availability = {}
+        avail_raw = t_data.get('availability', {})
+        if isinstance(avail_raw, dict):
+            for day, times in avail_raw.items():
+                if isinstance(times, dict):
+                    day_str = str(day).upper()
+                    start_epoch = time_to_epochs(times.get('start', ''), cal)
+                    end_epoch = time_to_epochs(times.get('end', ''), cal)
+                    availability[day_str] = {'start': start_epoch, 'end': end_epoch}
         
         teachers.append(Teacher(
             id=t_id,
-            avail_days=clean_days,
-            avail_start_epoch=avail_start,
-            avail_end_epoch=avail_end,
+            availability=availability,
             days_requested=t_data.get('days_requested')
         ))
         
@@ -162,6 +178,19 @@ def load_data(
         age_min = int(row['AgeMin']) if 'AgeMin' in row and not pd.isna(row['AgeMin']) else 20
         age_max = int(row['AgeMax']) if 'AgeMax' in row and not pd.isna(row['AgeMax']) else 20
         
+        # Parse Time Windows
+        allowed_days = None
+        if 'AllowedDays' in row and not pd.isna(row['AllowedDays']):
+            allowed_days = [d.strip().upper() for d in str(row['AllowedDays']).split(',')]
+            
+        earliest_start_epoch = None
+        if 'EarliestStart' in row and not pd.isna(row['EarliestStart']):
+            earliest_start_epoch = time_to_epochs(row['EarliestStart'], cal)
+            
+        latest_end_epoch = None
+        if 'LatestEnd' in row and not pd.isna(row['LatestEnd']):
+            latest_end_epoch = time_to_epochs(row['LatestEnd'], cal)
+        
         classes.append(ClassSession(
             id=class_id,
             style=style,
@@ -173,7 +202,10 @@ def load_data(
             pinned_time_epoch=pin_time,
             pinned_room=pin_r,
             age_min=age_min,
-            age_max=age_max
+            age_max=age_max,
+            allowed_days=allowed_days,
+            earliest_start_epoch=earliest_start_epoch,
+            latest_end_epoch=latest_end_epoch
         ))
         
     return rooms, teachers, classes

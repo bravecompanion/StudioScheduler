@@ -98,7 +98,8 @@ class StudioSchedulerModel:
             for t_id in valid_teachers:
                 if t_id not in self.teacher_by_id:
                     print(f"NOTICE: Teacher '{t_id}' is not in teachers.yaml. Assuming full availability.")
-                    t = Teacher(id=t_id, avail_days=self.cal.days, avail_start_epoch=0, avail_end_epoch=self.day_duration_epochs)
+                    avail = {d: {'start': 0, 'end': self.day_duration_epochs} for d in self.cal.days}
+                    t = Teacher(id=t_id, availability=avail)
                     self.teachers.append(t)
                     self.teacher_by_id[t_id] = t
                     self.teacher_intervals[t_id] = []
@@ -156,12 +157,25 @@ class StudioSchedulerModel:
             day_idx_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_hard_{c.id}')
             self.model.AddDivisionEquality(day_idx_var, start_var, self.cal.day_offset)
             
+            # Class Time Window Constraints
+            if c.allowed_days:
+                valid_day_indices = [i for i, d in enumerate(self.cal.days) if d in c.allowed_days]
+                invalid_day_indices = [i for i in range(len(self.cal.days)) if i not in valid_day_indices]
+                for inv_idx in invalid_day_indices:
+                    self.model.Add(day_idx_var != inv_idx)
+                    
+            if c.earliest_start_epoch is not None:
+                self.model.Add(epoch_in_day >= c.earliest_start_epoch)
+                
+            if c.latest_end_epoch is not None:
+                self.model.Add(epoch_in_day + c.duration_epochs <= c.latest_end_epoch)
+            
             for t_id, presence in teacher_presences.items():
                 t = self.teacher_by_id[t_id]
                 
-                # Day of Week Availability
-                if getattr(t, 'avail_days', None):
-                    valid_day_indices = [i for i, d in enumerate(self.cal.days) if d in t.avail_days]
+                valid_days = getattr(t, 'availability', {})
+                if valid_days is not None:
+                    valid_day_indices = [i for i, d in enumerate(self.cal.days) if d in valid_days]
                     invalid_day_indices = [i for i in range(len(self.cal.days)) if i not in valid_day_indices]
                     
                     for inv_idx in invalid_day_indices:
@@ -172,12 +186,27 @@ class StudioSchedulerModel:
                         # If the class falls on an invalid day, the teacher cannot be assigned to it.
                         self.model.AddImplication(is_invalid_day, presence.Not())
                         
-                # Time of Day Availability
-                if getattr(t, 'avail_start_epoch', None) is not None:
-                    self.model.Add(epoch_in_day >= t.avail_start_epoch).OnlyEnforceIf(presence)
-                    
-                if getattr(t, 'avail_end_epoch', None) is not None:
-                    self.model.Add(epoch_in_day + c.duration_epochs <= t.avail_end_epoch).OnlyEnforceIf(presence)
+                    # Time of Day Availability per valid day
+                    for d_idx, day_str in enumerate(self.cal.days):
+                        if day_str not in valid_days:
+                            continue
+                            
+                        times = valid_days[day_str]
+                        start_epoch = times.get('start')
+                        end_epoch = times.get('end')
+                        
+                        if start_epoch is not None or end_epoch is not None:
+                            is_on_day = self.model.NewBoolVar(f'is_on_day_time_{c.id}_{t.id}_{d_idx}')
+                            self.model.Add(day_idx_var == d_idx).OnlyEnforceIf(is_on_day)
+                            self.model.Add(day_idx_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                            
+                            enforce_time = self.model.NewBoolVar(f'enforce_time_{c.id}_{t.id}_{d_idx}')
+                            self.model.AddBoolAnd([presence, is_on_day]).OnlyEnforceIf(enforce_time)
+                            
+                            if start_epoch is not None:
+                                self.model.Add(epoch_in_day >= start_epoch).OnlyEnforceIf(enforce_time)
+                            if end_epoch is not None:
+                                self.model.Add(epoch_in_day + c.duration_epochs <= end_epoch).OnlyEnforceIf(enforce_time)
                 
         # NoOverlap for Rooms
         for r_id, intervals in self.room_intervals.items():
@@ -532,6 +561,20 @@ class StudioSchedulerModel:
             if not valid_t:
                 errors.append(f"Class '{c.id}' has no valid teachers assigned (not in preferred list, and no pinned teacher).")
                 
+            if c.pinned_time_epoch is not None:
+                day_idx = c.pinned_time_epoch // self.cal.day_offset
+                day_str = self.cal.days[day_idx]
+                epoch_in_day = c.pinned_time_epoch % self.cal.day_offset
+                
+                if c.allowed_days and day_str not in c.allowed_days:
+                    errors.append(f"Class '{c.id}' is pinned to {day_str}, but its AllowedDays are {', '.join(c.allowed_days)}.")
+                    
+                if c.earliest_start_epoch is not None and epoch_in_day < c.earliest_start_epoch:
+                    errors.append(f"Class '{c.id}' is pinned to start at {to_time(epoch_in_day)}, but its EarliestStart is {to_time(c.earliest_start_epoch)}.")
+                    
+                if c.latest_end_epoch is not None and (epoch_in_day + c.duration_epochs) > c.latest_end_epoch:
+                    errors.append(f"Class '{c.id}' ends at {to_time(epoch_in_day + c.duration_epochs)}, but its LatestEnd is {to_time(c.latest_end_epoch)}.")
+                    
             if c.pinned_teacher and c.pinned_time_epoch is not None:
                 t = self.teacher_by_id.get(c.pinned_teacher)
                 if not t:
@@ -542,14 +585,20 @@ class StudioSchedulerModel:
                 day_str = self.cal.days[day_idx]
                 epoch_in_day = c.pinned_time_epoch % self.cal.day_offset
                 
-                if getattr(t, 'avail_days', None) and day_str not in t.avail_days:
-                    errors.append(f"Class '{c.id}' is pinned to {day_str}, but Teacher '{t.id}' does not work on {day_str}. (Available: {', '.join(t.avail_days)})")
-                    
-                if getattr(t, 'avail_start_epoch', None) is not None and epoch_in_day < t.avail_start_epoch:
-                    errors.append(f"Class '{c.id}' is pinned to start at {to_time(epoch_in_day)}, but Teacher '{t.id}' does not start until {to_time(t.avail_start_epoch)}.")
-                    
-                if getattr(t, 'avail_end_epoch', None) is not None and (epoch_in_day + c.duration_epochs) > t.avail_end_epoch:
-                    errors.append(f"Class '{c.id}' ends at {to_time(epoch_in_day + c.duration_epochs)}, but Teacher '{t.id}' leaves at {to_time(t.avail_end_epoch)}.")
+                valid_days = getattr(t, 'availability', {})
+                if valid_days is not None:
+                    if day_str not in valid_days:
+                        errors.append(f"Class '{c.id}' is pinned to {day_str}, but Teacher '{t.id}' does not work on {day_str}. (Available: {', '.join(valid_days.keys())})")
+                    else:
+                        times = valid_days.get(day_str, {})
+                        t_start = times.get('start')
+                        t_end = times.get('end')
+                        
+                        if t_start is not None and epoch_in_day < t_start:
+                            errors.append(f"Class '{c.id}' is pinned to start at {to_time(epoch_in_day)}, but Teacher '{t.id}' does not start until {to_time(t_start)} on {day_str}.")
+                            
+                        if t_end is not None and (epoch_in_day + c.duration_epochs) > t_end:
+                            errors.append(f"Class '{c.id}' ends at {to_time(epoch_in_day + c.duration_epochs)}, but Teacher '{t.id}' leaves at {to_time(t_end)} on {day_str}.")
                     
                 c_start = c.pinned_time_epoch
                 c_end = c.pinned_time_epoch + c.duration_epochs
@@ -601,7 +650,7 @@ class StudioSchedulerModel:
         solver.parameters.num_search_workers = 24
         
         # Stop early if no improvement is found for 30 seconds
-        callback = PlateauStoppingCallback(solver, plateau_time_limit=30.0)
+        callback = PlateauStoppingCallback(solver, plateau_time_limit=60.0)
         
         print("Starting solver...")
         status = solver.Solve(self.model, callback)
