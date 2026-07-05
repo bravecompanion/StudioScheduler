@@ -139,7 +139,8 @@ def export_to_json(results, json_path="schedule.json"):
             "extendedProps": {
                 "room_id": f"room_{r['Room']}",
                 "teacher_id": f"teacher_{r['Teacher']}",
-                "style": r.get('Style', '')
+                "style": r.get('Style', ''),
+                "cohort": r['Cohort']
             }
         })
 
