@@ -2,7 +2,38 @@ from ortools.sat.python import cp_model
 from typing import List, Tuple
 import re
 from collections import defaultdict
+import time
+import threading
 from .models import ClassSession, Room, Teacher, StudioCalendar
+
+class PlateauStoppingCallback(cp_model.CpSolverSolutionCallback):
+    def __init__(self, solver_instance, plateau_time_limit):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.solver_instance = solver_instance
+        self.plateau_time_limit = plateau_time_limit
+        self.last_improvement_time = time.time()
+        self.stop_event = threading.Event()
+        
+        # Start watcher thread
+        self.watcher = threading.Thread(target=self._watch)
+        self.watcher.daemon = True
+        self.watcher.start()
+
+    def on_solution_callback(self):
+        # Called every time a new incumbent (better) solution is found
+        self.last_improvement_time = time.time()
+        
+    def _watch(self):
+        while not self.stop_event.is_set():
+            time.sleep(1)
+            # If the solver has been running without improvement for the limit
+            if time.time() - self.last_improvement_time > self.plateau_time_limit:
+                print(f"\n[Solver] Stopping early! No improvement for {self.plateau_time_limit} seconds.")
+                self.solver_instance.StopSearch()
+                break
+
+    def stop_watcher(self):
+        self.stop_event.set()
 
 class StudioSchedulerModel:
     def __init__(self, classes: List[ClassSession], rooms: List[Room], teachers: List[Teacher], cal: StudioCalendar):
@@ -178,6 +209,7 @@ class StudioSchedulerModel:
         self._penalize_teacher_schedule_span()
         self._penalize_teacher_days_requested()
         self._reward_cohort_bunching()
+        self._penalize_overlapping_sessions()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -247,6 +279,40 @@ class StudioSchedulerModel:
                 
                 # Multiply by a solid weight to heavily prioritize spreading them out
                 self.penalties.append(count_sq * PENALTY_MULT)
+
+    def _penalize_overlapping_sessions(self):
+        """Soft Constraint: Penalize scheduling 2 sessions of the same class at overlapping times."""
+        # Group classes by base name
+        base_class_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_groups[base_name].append(c)
+            
+        for base_name, class_list in base_class_groups.items():
+            if len(class_list) <= 1:
+                continue
+                
+            for i in range(len(class_list)):
+                for j in range(i + 1, len(class_list)):
+                    c1 = class_list[i]
+                    c2 = class_list[j]
+                    
+                    b_e1_le_s2 = self.model.NewBoolVar(f'e1_le_s2_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c1.id]['end'] <= self.class_vars[c2.id]['start']).OnlyEnforceIf(b_e1_le_s2)
+                    self.model.Add(self.class_vars[c1.id]['end'] >= self.class_vars[c2.id]['start'] + 1).OnlyEnforceIf(b_e1_le_s2.Not())
+                    
+                    b_e2_le_s1 = self.model.NewBoolVar(f'e2_le_s1_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c2.id]['end'] <= self.class_vars[c1.id]['start']).OnlyEnforceIf(b_e2_le_s1)
+                    self.model.Add(self.class_vars[c2.id]['end'] >= self.class_vars[c1.id]['start'] + 1).OnlyEnforceIf(b_e2_le_s1.Not())
+                    
+                    # Overlap is true if NEITHER interval ends before the other starts
+                    b_overlap = self.model.NewBoolVar(f'overlap_{c1.id}_{c2.id}')
+                    self.model.AddBoolAnd([b_e1_le_s2.Not(), b_e2_le_s1.Not()]).OnlyEnforceIf(b_overlap)
+                    self.model.AddBoolOr([b_e1_le_s2, b_e2_le_s1]).OnlyEnforceIf(b_overlap.Not())
+                    
+                    # High penalty to strongly discourage it
+                    self.penalties.append(b_overlap * 500)
 
     def _penalize_session_time_clustering(self):
         """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
@@ -427,11 +493,20 @@ class StudioSchedulerModel:
                     self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] >= 4).OnlyEnforceIf(close_2_to_1)
                     self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] <= 6).OnlyEnforceIf(close_2_to_1)
                     
+                    # Determine reward values
+                    t1_reward = -120
+                    t2_reward = -90
+                    
+                    # Special bonus for bunching jazz and ballet
+                    if {c1.style.lower(), c2.style.lower()} == {'jazz', 'ballet'}:
+                        t1_reward = -240
+                        t2_reward = -180
+                    
                     # Add negative penalties (rewards)
-                    self.penalties.append(b2b_1_to_2 * -30)
-                    self.penalties.append(b2b_2_to_1 * -30)
-                    self.penalties.append(close_1_to_2 * -15)
-                    self.penalties.append(close_2_to_1 * -15)
+                    self.penalties.append(b2b_1_to_2 * t1_reward)
+                    self.penalties.append(b2b_2_to_1 * t1_reward)
+                    self.penalties.append(close_1_to_2 * t2_reward)
+                    self.penalties.append(close_2_to_1 * t2_reward)
 
     def validate_inputs(self):
         """Sanity checker that runs before the CP-SAT engine to find impossible constraints."""
@@ -522,11 +597,15 @@ class StudioSchedulerModel:
         
         solver = cp_model.CpSolver()
         solver.parameters.log_search_progress = True
-        solver.parameters.max_time_in_seconds = 60.0
+        solver.parameters.max_time_in_seconds = 300.0
         solver.parameters.num_search_workers = 24
         
+        # Stop early if no improvement is found for 30 seconds
+        callback = PlateauStoppingCallback(solver, plateau_time_limit=30.0)
+        
         print("Starting solver...")
-        status = solver.Solve(self.model)
+        status = solver.Solve(self.model, callback)
+        callback.stop_watcher()
         
         results = []
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
