@@ -1,5 +1,7 @@
 ClassName,Style,Cohort,AgeMin,AgeMax,Duration,Size,PinTeacher,PinTime,PinRoom
 ballet_12plus,ballet,"""12+""",12,18,60,20,,,
+ballet_9_12_1,ballet,"""9-12""",9,12,60,20,,,
+ballet_9_12_2,ballet,"""9-12""",9,12,60,20,,,
 ballet_6to8_1,ballet,"""6-8""",6,8,60,20,,,
 ballet_6to8_2,ballet,"""6-8""",6,8,60,20,,,
 ballet_6to8_3,ballet,"""6-8""",6,8,60,20,,,
