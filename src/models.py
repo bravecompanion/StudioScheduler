@@ -24,6 +24,8 @@ class ClassSession:
     pinned_teacher: Optional[str] = None
     pinned_time_epoch: Optional[int] = None
     pinned_room: Optional[str] = None
+    age_min: int = 20
+    age_max: int = 20
 
 @dataclass
 class StudioCalendar:

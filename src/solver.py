@@ -110,9 +110,30 @@ def build_and_solve(classes: List[ClassSession], rooms: List[Room], teachers: Li
         if intervals:
             model.AddNoOverlap(intervals)
             
+    # === OBJECTIVE FUNCTION ===
+    penalties = []
+    
+    # 1. Soft Constraint: Push younger age groups earlier
+    for c in classes:
+        if c.id not in class_vars: continue
+        c_vars = class_vars[c.id]
+        start_var = c_vars['start']
+        
+        # Weight = (20 - age_min). If age_min is 5, weight is 15. If age_min is 20, weight is 0.
+        weight = max(0, 20 - c.age_min)
+        if weight > 0:
+            # Optimize for the time OF THE DAY, not the absolute time in the week.
+            epoch_in_day = model.NewIntVar(0, cal.day_offset - 1, f'epoch_in_day_{c.id}')
+            model.AddModuloEquality(epoch_in_day, start_var, cal.day_offset)
+            penalties.append(epoch_in_day * weight)
+            
+    if penalties:
+        model.Minimize(sum(penalties))
+        
     solver = cp_model.CpSolver()
     solver.parameters.log_search_progress = True
     solver.parameters.max_time_in_seconds = 60.0
+    solver.parameters.num_search_workers = 24  # Utilizing i7-14700 (24 threads)
     
     print("Starting solver...")
     status = solver.Solve(model)

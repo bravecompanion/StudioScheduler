@@ -200,7 +200,8 @@
         
         eventMouseEnter: function(info) {
           const props = info.event.extendedProps;
-          info.el.title = `Style: ${props.style}\nRoom: ${props.room_id.replace('room_', '')}\nTeacher: ${props.teacher_id.replace('teacher_', '')}`;
+          const className = info.event.id;
+          info.el.title = `Class: ${className}\nCohort: ${props.cohort}\nStyle: ${props.style}\nRoom: ${props.room_id.replace('room_', '')}\nTeacher: ${props.teacher_id.replace('teacher_', '')}`;
         }
       });
 

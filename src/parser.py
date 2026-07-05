@@ -109,8 +109,10 @@ def load_data(
     classes_df = pd.read_csv(classes_csv)
     classes = []
     for _, row in classes_df.iterrows():
-        class_id = str(row['ClassName'])
         if pd.isna(row['ClassName']):
+            continue
+        class_id = str(row['ClassName']).strip()
+        if not class_id or class_id.lower() == 'nan':
             continue
             
         style = str(row['Style']).lower()
@@ -154,6 +156,10 @@ def load_data(
             
         pin_time = parse_pinned_time(row['PinTime'], cal)
         
+        # Parse Age
+        age_min = int(row['AgeMin']) if 'AgeMin' in row and not pd.isna(row['AgeMin']) else 20
+        age_max = int(row['AgeMax']) if 'AgeMax' in row and not pd.isna(row['AgeMax']) else 20
+        
         classes.append(ClassSession(
             id=class_id,
             style=style,
@@ -163,7 +169,9 @@ def load_data(
             preferred_teachers=pref_teachers,
             pinned_teacher=pin_t,
             pinned_time_epoch=pin_time,
-            pinned_room=pin_r
+            pinned_room=pin_r,
+            age_min=age_min,
+            age_max=age_max
         ))
         
     return rooms, teachers, classes
