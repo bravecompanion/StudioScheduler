@@ -157,6 +157,19 @@ class StudioSchedulerModel:
         for t_id, intervals in self.teacher_intervals.items():
             if intervals:
                 self.model.AddNoOverlap(intervals)
+                
+        self._add_one_off_custom_constraints()
+
+    def _add_one_off_custom_constraints(self):
+        """Dedicated space for highly specific, one-off hard constraints requested by the studio."""
+        # 1. HayleyTipton can teach at most 1 tinydancers class
+        hayley_tiny_dancers = []
+        for c in self.classes:
+            if c.style == 'tinydancers' and 'HayleyTipton' in self.class_vars[c.id].get('teacher_presences', {}):
+                hayley_tiny_dancers.append(self.class_vars[c.id]['teacher_presences']['HayleyTipton'])
+        
+        if hayley_tiny_dancers:
+            self.model.Add(sum(hayley_tiny_dancers) <= 1)
 
     def add_soft_constraints(self):
         self._penalize_late_young_classes()
@@ -275,6 +288,7 @@ class StudioSchedulerModel:
 
     def _penalize_teacher_schedule_span(self):
         """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
+        PENALTY_MULT=4
         for t in self.teachers:
             if not self.teacher_intervals[t.id]: continue
                 
@@ -324,7 +338,7 @@ class StudioSchedulerModel:
                 
                 span = self.model.NewIntVar(0, self.day_duration_epochs, f'span_{t.id}_{d_idx}')
                 self.model.AddMaxEquality(span, [0, max_end - min_start])
-                self.penalties.append(span * 10)
+                self.penalties.append(span * PENALTY_MULT)
 
     def _penalize_teacher_days_requested(self):
         """Soft Constraint: Penalize if a teacher is active on more or fewer days than they requested."""
