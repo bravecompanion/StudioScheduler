@@ -140,7 +140,9 @@ def export_to_json(results, json_path="schedule.json"):
                 "room_id": f"room_{r['Room']}",
                 "teacher_id": f"teacher_{r['Teacher']}",
                 "style": r.get('Style', ''),
-                "cohort": r['Cohort']
+                "cohort": r['Cohort'],
+                "is_pinned_teacher": r.get('Is_Pinned_Teacher', False),
+                "is_pinned_time": r.get('Is_Pinned_Time', False)
             }
         })
 

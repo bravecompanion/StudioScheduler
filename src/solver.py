@@ -157,7 +157,10 @@ def build_and_solve(classes: List[ClassSession], rooms: List[Room], teachers: Li
                 'Start_Time': time_str,
                 'Duration_Mins': c.duration_epochs * cal.epoch_minutes,
                 'Room': assigned_room,
-                'Teacher': assigned_teacher
+                'Teacher': assigned_teacher,
+                'Is_Pinned_Teacher': c.pinned_teacher is not None,
+                'Is_Pinned_Time': c.pinned_time_epoch is not None,
+                'Is_Pinned_Room': c.pinned_room is not None
             })
             
         return results, status

@@ -50,7 +50,6 @@
       --fc-button-active-bg-color: #1d4ed8;
     }
 
-    /* Modernize the event blocks */
     .fc-timeline-event { 
       cursor: pointer; 
       border-radius: 6px !important;
@@ -59,6 +58,10 @@
       padding: 2px 6px;
       font-weight: 500;
       overflow: hidden;
+    }
+
+    .pinned-time-event {
+      border-width: 3px !important;
     }
 
     /* Soften the header font */
@@ -145,12 +148,18 @@
         return data.events.map(event => {
           const color = getColorForEvent(event, colorDimension);
           
+          const classNames = [];
+          if (event.extendedProps.is_pinned_time) {
+              classNames.push('pinned-time-event');
+          }
+          
           return {
             ...event,
             resourceId: dimension === 'rooms' ? event.extendedProps.room_id : event.extendedProps.teacher_id,
             backgroundColor: color,
             borderColor: 'black',
-            textColor: 'black'
+            textColor: 'black',
+            classNames: classNames
           };
         });
       }
@@ -172,7 +181,11 @@
           const startStr = arg.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
           const endStr = arg.event.end ? arg.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
           const className = arg.event.id;
-          const teacherName = props.teacher_id.replace('teacher_', '');
+          let teacherName = props.teacher_id.replace('teacher_', '');
+          
+          if (props.is_pinned_teacher) {
+              teacherName = teacherName.toUpperCase();
+          }
           
           return {
             html: `
