@@ -144,6 +144,14 @@ class StudioSchedulerModel:
                         self.model.Add(teacher_presences[c.pinned_teacher] == 1)
                     else:
                         print(f"CRITICAL ERROR: Class '{c.id}' is pinned to Teacher '{c.pinned_teacher}' but they were excluded.")
+            
+            # Teacher Hate Preferences (hard constraint)
+            for t_id, presence in teacher_presences.items():
+                t = self.teacher_by_id.get(t_id)
+                if not t: continue
+                
+                if c.style.lower() in t.hate_classes or c.cohort in t.hate_cohorts:
+                    self.model.Add(presence == 0)
                         
             # Time pinning
             if c.pinned_time_epoch is not None:
@@ -292,6 +300,7 @@ class StudioSchedulerModel:
         self._penalize_overlapping_sessions()
         self._manage_cohort_overlaps()
         self._penalize_teacher_class_monopoly()
+        self._reward_teacher_diversity()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -489,6 +498,48 @@ class StudioSchedulerModel:
                     
                     # High penalty per excess class over 2
                     self.penalties.append(excess * PENALTY_MULT)
+
+    def _reward_teacher_diversity(self):
+        """Soft Constraint: Encourage using different teachers for sessions of the same class.
+        
+        For each pair of sessions of the same base class, applies a penalty if they
+        share the same teacher. This gently nudges the solver toward teacher variety
+        without hard-blocking repeats.
+        """
+        import re
+        from collections import defaultdict
+        
+        PENALTY_MULT = 80
+        
+        base_class_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_groups[base_name].append(c)
+            
+        for base_name, class_list in base_class_groups.items():
+            if len(class_list) <= 1:
+                continue
+                
+            for i in range(len(class_list)):
+                for j in range(i + 1, len(class_list)):
+                    c1 = class_list[i]
+                    c2 = class_list[j]
+                    
+                    # For each teacher who could teach both sessions
+                    for t in self.teachers:
+                        p1 = self.class_vars[c1.id]['teacher_presences'].get(t.id)
+                        p2 = self.class_vars[c2.id]['teacher_presences'].get(t.id)
+                        
+                        if p1 is None or p2 is None:
+                            continue
+                        
+                        # Both sessions assigned to this same teacher
+                        both_same = self.model.NewBoolVar(f'same_teacher_{t.id}_{c1.id}_{c2.id}')
+                        self.model.AddBoolAnd([p1, p2]).OnlyEnforceIf(both_same)
+                        self.model.AddBoolOr([p1.Not(), p2.Not()]).OnlyEnforceIf(both_same.Not())
+                        
+                        self.penalties.append(both_same * PENALTY_MULT)
 
     def _penalize_session_time_clustering(self):
         """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
