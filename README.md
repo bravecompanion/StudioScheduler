@@ -1,45 +1,63 @@
 # Studio Scheduler
 
-Studio Scheduler is a robust constraint-programming optimization engine designed to automatically generate conflict-free schedules for a dance or fitness studio. It handles assigning classes to specific rooms and teachers while ensuring no double-booking occurs, and it leverages Google's OR-Tools (CP-SAT solver) to find mathematically optimal configurations based on a series of hard and soft constraints.
+Studio Scheduler is a constraint-programming optimization engine that generates conflict-free schedules for a dance or fitness studio. It assigns classes to specific rooms and teachers while preventing double-booking, and uses Google's OR-Tools (CP-SAT solver) to find configurations based on hard and soft constraints.
 
 ## Architecture
 
 The project consists of three primary components:
-1. **Data Pipeline (`models.py`, `parser.py`, `exporter.py`)**: Loads class configurations and requirements from a CSV file (`classes.csv`), structures them into Python dataclasses, and exports the final generated schedule to JSON.
-2. **Optimization Engine (`solver.py`)**: Uses CP-SAT to explore thousands of combinations concurrently across multiple CPU threads to find the most optimal schedule.
-3. **Frontend Visualizer (`index.html`)**: A Bootstrap 5 & FullCalendar-based local web app that consumes the exported JSON and provides a highly readable, interactive visualization of the schedule.
+1. **Data Pipeline (`models.py`, `parser.py`, `exporter.py`)**: Loads class configurations and requirements from a CSV file (`classes.csv`), parses teacher availability and preferences from YAML (`teachers.yaml`), structures them into Python dataclasses, and exports the generated schedule to JSON.
+2. **Optimization Engine (`solver.py`)**: Uses CP-SAT to explore combinations concurrently across multiple CPU threads.
+3. **Frontend Visualizer (`index.html`)**: A Bootstrap 5 & FullCalendar-based local web app that consumes the exported JSON and provides an interactive visualization of the schedule.
+
+## Class and Teacher Configurations
+Inputs are defined in `classes.csv` and `teachers.yaml`. Recent configurations include:
+- **Time Windows**: Classes can be constrained by `AllowedDays`, `EarliestStart`, and `LatestEnd`.
+- **Teacher Availability**: Teachers have per-day start and end availability times.
+- **Teacher Preferences**: Teachers can declare `hate_class` and `hate_cohort` lists, which act as hard constraints preventing those assignments.
 
 ## How the Solver Works
 
-The solver engine (`src/solver.py`) is built using a clean, extensible **Object-Oriented Architecture** via the `StudioSchedulerModel` class.
+The solver engine (`src/solver.py`) is structured via the `StudioSchedulerModel` class.
 
-When `main.py` runs, the `build_and_solve()` function orchestrates the following lifecycle:
+When `main.py` runs, the `build_and_solve()` function orchestrates the lifecycle:
 
 1. **`create_variables()`**
    - For every class in `classes.csv`, the solver generates possible "start time" variables (epochs).
-   - It also generates Boolean variables representing whether a class is assigned to a specific room or teacher.
+   - It generates Boolean variables representing whether a class is assigned to a specific room or teacher.
 
 2. **`add_hard_constraints()`**
-   - This lays down the physics of the schedule. Hard constraints *cannot* be broken under any circumstances.
+   - Hard constraints must be satisfied for the schedule to be valid.
    - **Exactly One**: Forces every class to select exactly one valid room and exactly one valid teacher.
-   - **No Overlap**: Ensures that no two classes occupy the same room simultaneously, and no teacher is scheduled to teach two classes simultaneously.
-   - **Pinning**: Enforces explicit overrides (e.g., if a class is pinned to "Teacher A" in the CSV, it must be assigned to "Teacher A").
+   - **No Overlap**: Ensures no two classes occupy the same room simultaneously, and no teacher teaches two classes simultaneously.
+   - **Pinning**: Enforces explicit overrides (e.g., if a class is pinned to a specific room or teacher).
+   - **Time Windows**: Enforces class time limits and allowed days.
+   - **Teacher Minimum Hours**: Ensures teachers have > 1 hour scheduled every day they teach.
+   - **Teacher Hates**: Prevents assigning teachers to classes or cohorts they dislike.
+   - **Singleton Overlaps**: Prevents overlaps between singleton classes in the same cohort.
 
 3. **`add_soft_constraints()`**
-   - Soft constraints do not make a schedule invalid; rather, they add mathematical "penalties" to specific outcomes. The solver will actively try to minimize the sum of all penalties across the schedule.
-   - By encapsulating the model in an Object-Oriented structure, every soft constraint is isolated into its own private method (e.g., `_penalize_late_young_classes()`) which is called from this orchestrator.
+   - Soft constraints apply mathematical "penalties" to specific outcomes. The solver attempts to minimize the total penalty.
+   - **Teacher Idle Time**: Penalizes gaps between a teacher's classes on a given day.
+   - **Teacher Monopoly**: Hard penalty at 3+ sessions of the same class for a single teacher.
+   - **Teacher Diversity**: Gentle penalty for assigning the same teacher to multiple sessions of the same class.
+   - **Cohort Clustering**: Rewards scheduling classes of the same cohort close together, and penalizes them for being far apart (pulls singletons to the same day and tightens their schedule).
+   - **Session Time Clustering**: Diversifies the time-of-day that sessions of the same class are offered.
+   - **Overlapping Sessions**: Penalizes scheduling 2 sessions of the same class at the same time.
 
-4. **`solve()`**
-   - Unleashes the CP-SAT engine utilizing multi-threading (currently set to 24 workers) to explore different branches of the decision tree concurrently.
+4. **`seed_hints()`**
+   - Runs a greedy pre-solver to generate a baseline schedule, passing it to CP-SAT via `AddHint()` to accelerate search convergence.
+
+5. **`solve()`**
+   - Executes the CP-SAT engine using multi-threading (currently set to 27 workers). Stops early via `PlateauStoppingCallback` if no improvement is found.
 
 ## Extending the Solver (Adding Soft Constraints)
 
-The Object-Oriented structure makes it incredibly easy to add new scheduling logic. If you want to introduce a new preference (e.g., "Teachers prefer not to have gaps between classes"), you follow these three steps:
+To introduce a new scheduling rule:
 
 ### Step 1: Write the Constraint Method
 Create a new private method in the `StudioSchedulerModel` class inside `src/solver.py`. 
 
-For example, a constraint to heavily penalize classes scheduled on Fridays:
+For example, a constraint to penalize classes scheduled on Fridays:
 ```python
 def _penalize_friday_classes(self):
     """Soft Constraint: Minimize classes scheduled on Friday."""
@@ -47,7 +65,7 @@ def _penalize_friday_classes(self):
         if c.id not in self.class_vars: continue
         
         start_var = self.class_vars[c.id]['start']
-        # We need a boolean flag for whether the class lands on a Friday
+        # Boolean flag for whether the class lands on a Friday
         is_friday = self.model.NewBoolVar(f'is_friday_{c.id}')
         
         # Calculate the day index (0=MON, 1=TUE, 2=WED, 3=THU, 4=FRI)
@@ -58,16 +76,15 @@ def _penalize_friday_classes(self):
         self.model.Add(day_idx == 4).OnlyEnforceIf(is_friday)
         self.model.Add(day_idx != 4).OnlyEnforceIf(is_friday.Not())
         
-        # Add a heavy penalty of 100 for any class landing on Friday
+        # Add a penalty for any class landing on Friday
         self.penalties.append(is_friday * 100)
 ```
 
 ### Step 2: Register the Constraint
-Call your new method inside the `add_soft_constraints` orchestrator:
+Call your new method inside `add_soft_constraints`:
 
 ```python
     def add_soft_constraints(self):
-        self._penalize_late_young_classes()
         self._penalize_friday_classes() # <--- Your new constraint!
         
         if self.penalties:
@@ -75,5 +92,5 @@ Call your new method inside the `add_soft_constraints` orchestrator:
 ```
 
 ### Constraint Tips
-- **Piecewise Step Functions**: Instead of penalizing something constantly (like age), you can create "Thresholds". We use `model.AddMaxEquality()` to say "Only penalize this class if its start time goes *past* 5:00 PM." This allows the solver flexibility to move things around prior to the deadline without penalty.
-- **Variables**: CP-SAT requires you to model decisions as integer variables (`NewIntVar`) or boolean variables (`NewBoolVar`). You cannot use standard Python `if/else` logic to evaluate the start time of a class, because the start time hasn't been decided yet! You must use OR-Tools mathematical equivalents like `AddModuloEquality` or `.OnlyEnforceIf()`.
+- **Piecewise Step Functions**: Thresholds can be created using `model.AddMaxEquality()`. For example, "Only penalize this class if its start time goes past 5:00 PM."
+- **Variables**: CP-SAT requires modeling decisions as integer variables (`NewIntVar`) or boolean variables (`NewBoolVar`). Standard Python `if/else` logic cannot evaluate class start times during constraint definition. Use OR-Tools mathematical equivalents like `AddModuloEquality` or `.OnlyEnforceIf()`.
