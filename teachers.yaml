@@ -129,16 +129,16 @@ Jordan:
   availability:
     MON:
       start: 4:00 PM
-      end: 9:00 PM
+      end: 8:00 PM
     TUE:
       start: 4:00 PM
-      end: 9:00 PM
+      end: 8:00 PM
     WED:
       start: 4:00 PM
-      end: 9:00 PM
+      end: 8:00 PM
     THU:
       start: 4:00 PM
-      end: 9:00 PM
+      end: 8:00 PM
   days_requested: 1
   love_class:
     - acro

@@ -107,10 +107,10 @@
     {
       "id": "ballet_12plus",
       "title": "ballet_12plus (12+)",
-      "start": "2026-07-07T18:30:00",
-      "end": "2026-07-07T19:30:00",
+      "start": "2026-07-07T19:25:00",
+      "end": "2026-07-07T20:25:00",
       "extendedProps": {
-        "room_id": "room_5",
+        "room_id": "room_4",
         "teacher_id": "teacher_Qs",
         "style": "ballet",
         "cohort": "12+",
@@ -121,8 +121,22 @@
     {
       "id": "ballet_9_12_1",
       "title": "ballet_9_12_1 (9-12)",
-      "start": "2026-07-06T19:25:00",
-      "end": "2026-07-06T20:25:00",
+      "start": "2026-07-07T19:25:00",
+      "end": "2026-07-07T20:25:00",
+      "extendedProps": {
+        "room_id": "room_5",
+        "teacher_id": "teacher_Courteney",
+        "style": "ballet",
+        "cohort": "9-12",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "ballet_9_12_2",
+      "title": "ballet_9_12_2 (9-12)",
+      "start": "2026-07-06T19:30:00",
+      "end": "2026-07-06T20:30:00",
       "extendedProps": {
         "room_id": "room_3",
         "teacher_id": "teacher_Qs",
@@ -133,27 +147,13 @@
       }
     },
     {
-      "id": "ballet_9_12_2",
-      "title": "ballet_9_12_2 (9-12)",
-      "start": "2026-07-07T18:35:00",
-      "end": "2026-07-07T19:35:00",
-      "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_Morganne",
-        "style": "ballet",
-        "cohort": "9-12",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
       "id": "ballet_6to8_1",
       "title": "ballet_6to8_1 (6-8)",
-      "start": "2026-07-07T15:40:00",
-      "end": "2026-07-07T16:40:00",
+      "start": "2026-07-08T15:30:00",
+      "end": "2026-07-08T16:30:00",
       "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Meredith",
+        "room_id": "room_3",
+        "teacher_id": "teacher_Morganne",
         "style": "ballet",
         "cohort": "6-8",
         "is_pinned_teacher": false,
@@ -163,11 +163,11 @@
     {
       "id": "ballet_6to8_2",
       "title": "ballet_6to8_2 (6-8)",
-      "start": "2026-07-06T15:30:00",
-      "end": "2026-07-06T16:30:00",
+      "start": "2026-07-06T17:30:00",
+      "end": "2026-07-06T18:30:00",
       "extendedProps": {
-        "room_id": "room_2",
-        "teacher_id": "teacher_Catherine",
+        "room_id": "room_3",
+        "teacher_id": "teacher_Qs",
         "style": "ballet",
         "cohort": "6-8",
         "is_pinned_teacher": false,
@@ -177,11 +177,11 @@
     {
       "id": "ballet_6to8_3",
       "title": "ballet_6to8_3 (6-8)",
-      "start": "2026-07-09T17:30:00",
-      "end": "2026-07-09T18:30:00",
+      "start": "2026-07-09T16:55:00",
+      "end": "2026-07-09T17:55:00",
       "extendedProps": {
         "room_id": "room_4",
-        "teacher_id": "teacher_Morganne",
+        "teacher_id": "teacher_JessicaF",
         "style": "ballet",
         "cohort": "6-8",
         "is_pinned_teacher": false,
@@ -191,10 +191,10 @@
     {
       "id": "bitty_boppers_1",
       "title": "bitty_boppers_1 (5-7)",
-      "start": "2026-07-09T15:55:00",
-      "end": "2026-07-09T16:55:00",
+      "start": "2026-07-09T16:30:00",
+      "end": "2026-07-09T17:30:00",
       "extendedProps": {
-        "room_id": "room_6",
+        "room_id": "room_5",
         "teacher_id": "teacher_Stephanie",
         "style": "bittyboppers",
         "cohort": "5-7",
@@ -205,10 +205,10 @@
     {
       "id": "bitty_boppers_2",
       "title": "bitty_boppers_2 (5-7)",
-      "start": "2026-07-08T17:05:00",
-      "end": "2026-07-08T18:05:00",
+      "start": "2026-07-08T15:40:00",
+      "end": "2026-07-08T16:40:00",
       "extendedProps": {
-        "room_id": "room_5",
+        "room_id": "room_6",
         "teacher_id": "teacher_Stephanie",
         "style": "bittyboppers",
         "cohort": "5-7",
@@ -219,11 +219,11 @@
     {
       "id": "contemporary_12plus",
       "title": "contemporary_12plus (12+)",
-      "start": "2026-07-09T19:30:00",
-      "end": "2026-07-09T20:30:00",
+      "start": "2026-07-06T19:30:00",
+      "end": "2026-07-06T20:30:00",
       "extendedProps": {
-        "room_id": "room_2",
-        "teacher_id": "teacher_Courteney",
+        "room_id": "room_5",
+        "teacher_id": "teacher_Lauren",
         "style": "contemporary",
         "cohort": "12+",
         "is_pinned_teacher": false,
@@ -233,10 +233,10 @@
     {
       "id": "contemporary_6to9_1",
       "title": "contemporary_6to9_1 (6-9)",
-      "start": "2026-07-09T16:00:00",
-      "end": "2026-07-09T17:00:00",
+      "start": "2026-07-09T18:25:00",
+      "end": "2026-07-09T19:25:00",
       "extendedProps": {
-        "room_id": "room_2",
+        "room_id": "room_5",
         "teacher_id": "teacher_Morganne",
         "style": "contemporary",
         "cohort": "6-9",
@@ -247,11 +247,11 @@
     {
       "id": "contemporary_6to9_2",
       "title": "contemporary_6to9_2 (6-9)",
-      "start": "2026-07-06T17:30:00",
-      "end": "2026-07-06T18:30:00",
+      "start": "2026-07-08T15:30:00",
+      "end": "2026-07-08T16:30:00",
       "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Lauren",
+        "room_id": "room_4",
+        "teacher_id": "teacher_HailleBell",
         "style": "contemporary",
         "cohort": "6-9",
         "is_pinned_teacher": false,
@@ -275,8 +275,8 @@
     {
       "id": "acro",
       "title": "acro (9-18)",
-      "start": "2026-07-07T15:45:00",
-      "end": "2026-07-07T16:45:00",
+      "start": "2026-07-07T16:00:00",
+      "end": "2026-07-07T17:15:00",
       "extendedProps": {
         "room_id": "room_3",
         "teacher_id": "teacher_Jordan",
@@ -292,8 +292,8 @@
       "start": "2026-07-09T18:30:00",
       "end": "2026-07-09T19:30:00",
       "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Courteney",
+        "room_id": "room_2",
+        "teacher_id": "teacher_HailleBell",
         "style": "hiphop",
         "cohort": "12+",
         "is_pinned_teacher": false,
@@ -303,11 +303,11 @@
     {
       "id": "hiphop_6to8_1",
       "title": "hiphop_6to8_1 (6-8)",
-      "start": "2026-07-09T18:30:00",
-      "end": "2026-07-09T19:30:00",
+      "start": "2026-07-06T15:30:00",
+      "end": "2026-07-06T16:30:00",
       "extendedProps": {
-        "room_id": "room_2",
-        "teacher_id": "teacher_HailleBell",
+        "room_id": "room_3",
+        "teacher_id": "teacher_EmilyJ",
         "style": "hiphop",
         "cohort": "6-8",
         "is_pinned_teacher": false,
@@ -317,10 +317,10 @@
     {
       "id": "hiphop_6to8_2",
       "title": "hiphop_6to8_2 (6-8)",
-      "start": "2026-07-09T15:30:00",
-      "end": "2026-07-09T16:30:00",
+      "start": "2026-07-07T16:25:00",
+      "end": "2026-07-07T17:25:00",
       "extendedProps": {
-        "room_id": "room_5",
+        "room_id": "room_4",
         "teacher_id": "teacher_Cameron",
         "style": "hiphop",
         "cohort": "6-8",
@@ -331,10 +331,10 @@
     {
       "id": "hiphop_6to8_3",
       "title": "hiphop_6to8_3 (6-8)",
-      "start": "2026-07-08T15:35:00",
-      "end": "2026-07-08T16:35:00",
+      "start": "2026-07-07T18:15:00",
+      "end": "2026-07-07T19:15:00",
       "extendedProps": {
-        "room_id": "room_5",
+        "room_id": "room_3",
         "teacher_id": "teacher_HailleBell",
         "style": "hiphop",
         "cohort": "6-8",
@@ -345,10 +345,10 @@
     {
       "id": "hiphop_6to8_4",
       "title": "hiphop_6to8_4 (6-8)",
-      "start": "2026-07-06T18:20:00",
-      "end": "2026-07-06T19:20:00",
+      "start": "2026-07-06T17:30:00",
+      "end": "2026-07-06T18:30:00",
       "extendedProps": {
-        "room_id": "room_3",
+        "room_id": "room_5",
         "teacher_id": "teacher_HayleyTipton",
         "style": "hiphop",
         "cohort": "6-8",
@@ -359,11 +359,11 @@
     {
       "id": "hiphop_9to12_1",
       "title": "hiphop_9to12_1 (9-12)",
-      "start": "2026-07-06T16:00:00",
-      "end": "2026-07-06T17:00:00",
+      "start": "2026-07-07T17:25:00",
+      "end": "2026-07-07T18:25:00",
       "extendedProps": {
         "room_id": "room_5",
-        "teacher_id": "teacher_HailleBell",
+        "teacher_id": "teacher_Courteney",
         "style": "hiphop",
         "cohort": "9-12",
         "is_pinned_teacher": false,
@@ -373,11 +373,11 @@
     {
       "id": "hiphop_9to12_2",
       "title": "hiphop_9to12_2 (9-12)",
-      "start": "2026-07-08T19:30:00",
-      "end": "2026-07-08T20:30:00",
+      "start": "2026-07-06T19:30:00",
+      "end": "2026-07-06T20:30:00",
       "extendedProps": {
-        "room_id": "room_3",
-        "teacher_id": "teacher_Cameron",
+        "room_id": "room_4",
+        "teacher_id": "teacher_HailleBell",
         "style": "hiphop",
         "cohort": "9-12",
         "is_pinned_teacher": false,
@@ -387,10 +387,10 @@
     {
       "id": "jazz_12plus",
       "title": "jazz_12plus (12+)",
-      "start": "2026-07-07T19:30:00",
-      "end": "2026-07-07T20:30:00",
+      "start": "2026-07-07T18:25:00",
+      "end": "2026-07-07T19:25:00",
       "extendedProps": {
-        "room_id": "room_3",
+        "room_id": "room_5",
         "teacher_id": "teacher_Qs",
         "style": "jazz",
         "cohort": "12+",
@@ -401,50 +401,8 @@
     {
       "id": "jazz_6to8_1",
       "title": "jazz_6to8_1 (6-8)",
-      "start": "2026-07-09T17:30:00",
-      "end": "2026-07-09T18:30:00",
-      "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Kristian",
-        "style": "jazz",
-        "cohort": "6-8",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "jazz_6to8_2",
-      "title": "jazz_6to8_2 (6-8)",
-      "start": "2026-07-07T17:35:00",
-      "end": "2026-07-07T18:35:00",
-      "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_Jordan",
-        "style": "jazz",
-        "cohort": "6-8",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "jazz_6to8_3",
-      "title": "jazz_6to8_3 (6-8)",
-      "start": "2026-07-09T16:30:00",
-      "end": "2026-07-09T17:30:00",
-      "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Katie",
-        "style": "jazz",
-        "cohort": "6-8",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "jazz_6to8_4",
-      "title": "jazz_6to8_4 (6-8)",
-      "start": "2026-07-06T16:35:00",
-      "end": "2026-07-06T17:35:00",
+      "start": "2026-07-06T16:30:00",
+      "end": "2026-07-06T17:30:00",
       "extendedProps": {
         "room_id": "room_3",
         "teacher_id": "teacher_Kristian",
@@ -455,13 +413,55 @@
       }
     },
     {
-      "id": "jazz_9to12_1",
-      "title": "jazz_9to12_1 (9-12)",
-      "start": "2026-07-06T18:25:00",
-      "end": "2026-07-06T19:25:00",
+      "id": "jazz_6to8_2",
+      "title": "jazz_6to8_2 (6-8)",
+      "start": "2026-07-09T15:55:00",
+      "end": "2026-07-09T16:55:00",
+      "extendedProps": {
+        "room_id": "room_4",
+        "teacher_id": "teacher_Katie",
+        "style": "jazz",
+        "cohort": "6-8",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "jazz_6to8_3",
+      "title": "jazz_6to8_3 (6-8)",
+      "start": "2026-07-09T18:00:00",
+      "end": "2026-07-09T19:00:00",
+      "extendedProps": {
+        "room_id": "room_4",
+        "teacher_id": "teacher_Kristian",
+        "style": "jazz",
+        "cohort": "6-8",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "jazz_6to8_4",
+      "title": "jazz_6to8_4 (6-8)",
+      "start": "2026-07-06T18:30:00",
+      "end": "2026-07-06T19:30:00",
       "extendedProps": {
         "room_id": "room_4",
         "teacher_id": "teacher_Qs",
+        "style": "jazz",
+        "cohort": "6-8",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "jazz_9to12_1",
+      "title": "jazz_9to12_1 (9-12)",
+      "start": "2026-07-06T18:30:00",
+      "end": "2026-07-06T19:30:00",
+      "extendedProps": {
+        "room_id": "room_5",
+        "teacher_id": "teacher_HailleBell",
         "style": "jazz",
         "cohort": "9-12",
         "is_pinned_teacher": false,
@@ -471,8 +471,8 @@
     {
       "id": "jazz_9to12_2",
       "title": "jazz_9to12_2 (9-12)",
-      "start": "2026-07-09T19:30:00",
-      "end": "2026-07-09T20:30:00",
+      "start": "2026-07-07T18:25:00",
+      "end": "2026-07-07T19:25:00",
       "extendedProps": {
         "room_id": "room_4",
         "teacher_id": "teacher_Katie",
@@ -485,10 +485,10 @@
     {
       "id": "kindergarten_ballet",
       "title": "kindergarten_ballet (5-7)",
-      "start": "2026-07-07T16:20:00",
-      "end": "2026-07-07T17:05:00",
+      "start": "2026-07-07T16:40:00",
+      "end": "2026-07-07T17:25:00",
       "extendedProps": {
-        "room_id": "room_4",
+        "room_id": "room_5",
         "teacher_id": "teacher_Morganne",
         "style": "ballet",
         "cohort": "5-7",
@@ -499,22 +499,8 @@
     {
       "id": "kindergarten_jazz_1",
       "title": "kindergarten_jazz_1 (5-7)",
-      "start": "2026-07-07T15:35:00",
-      "end": "2026-07-07T16:20:00",
-      "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_Morganne",
-        "style": "jazz",
-        "cohort": "5-7",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "kindergarten_jazz_2",
-      "title": "kindergarten_jazz_2 (5-7)",
-      "start": "2026-07-08T18:05:00",
-      "end": "2026-07-08T18:50:00",
+      "start": "2026-07-08T18:10:00",
+      "end": "2026-07-08T18:55:00",
       "extendedProps": {
         "room_id": "room_5",
         "teacher_id": "teacher_Catherine",
@@ -525,10 +511,10 @@
       }
     },
     {
-      "id": "kindergarten_jazz_ballet",
-      "title": "kindergarten_jazz_ballet (5-7)",
-      "start": "2026-07-08T15:30:00",
-      "end": "2026-07-08T16:30:00",
+      "id": "kindergarten_jazz_2",
+      "title": "kindergarten_jazz_2 (5-7)",
+      "start": "2026-07-07T17:35:00",
+      "end": "2026-07-07T18:20:00",
       "extendedProps": {
         "room_id": "room_4",
         "teacher_id": "teacher_Morganne",
@@ -539,13 +525,27 @@
       }
     },
     {
+      "id": "kindergarten_jazz_ballet",
+      "title": "kindergarten_jazz_ballet (5-7)",
+      "start": "2026-07-07T15:30:00",
+      "end": "2026-07-07T16:30:00",
+      "extendedProps": {
+        "room_id": "room_1",
+        "teacher_id": "teacher_Morganne",
+        "style": "jazz",
+        "cohort": "5-7",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
       "id": "tap_6to9",
       "title": "tap_6to9 (6-9)",
-      "start": "2026-07-06T18:30:00",
-      "end": "2026-07-06T19:30:00",
+      "start": "2026-07-07T15:40:00",
+      "end": "2026-07-07T16:40:00",
       "extendedProps": {
         "room_id": "room_5",
-        "teacher_id": "teacher_Lauren",
+        "teacher_id": "teacher_Stephanie",
         "style": "tap",
         "cohort": "6-9",
         "is_pinned_teacher": false,
@@ -555,10 +555,10 @@
     {
       "id": "tap_9plus_1",
       "title": "tap_9plus_1 (9-12)",
-      "start": "2026-07-09T18:30:00",
-      "end": "2026-07-09T19:30:00",
+      "start": "2026-07-08T19:30:00",
+      "end": "2026-07-08T20:30:00",
       "extendedProps": {
-        "room_id": "room_4",
+        "room_id": "room_5",
         "teacher_id": "teacher_Cameron",
         "style": "tap",
         "cohort": "9-12",
@@ -569,11 +569,11 @@
     {
       "id": "tap_9plus_2",
       "title": "tap_9plus_2 (9-12)",
-      "start": "2026-07-07T16:40:00",
-      "end": "2026-07-07T17:40:00",
+      "start": "2026-07-06T18:30:00",
+      "end": "2026-07-06T19:30:00",
       "extendedProps": {
-        "room_id": "room_5",
-        "teacher_id": "teacher_Stephanie",
+        "room_id": "room_3",
+        "teacher_id": "teacher_Lauren",
         "style": "tap",
         "cohort": "9-12",
         "is_pinned_teacher": false,
@@ -583,8 +583,8 @@
     {
       "id": "tiny_dancers_1",
       "title": "tiny_dancers_1 (3-4)",
-      "start": "2026-07-06T16:45:00",
-      "end": "2026-07-06T17:30:00",
+      "start": "2026-07-07T17:35:00",
+      "end": "2026-07-07T18:20:00",
       "extendedProps": {
         "room_id": "room_6",
         "teacher_id": "teacher_Stephanie",
@@ -597,76 +597,6 @@
     {
       "id": "tiny_dancers_2",
       "title": "tiny_dancers_2 (3-4)",
-      "start": "2026-07-07T17:40:00",
-      "end": "2026-07-07T18:25:00",
-      "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_Stephanie",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_3",
-      "title": "tiny_dancers_3 (3-4)",
-      "start": "2026-07-09T17:45:00",
-      "end": "2026-07-09T18:30:00",
-      "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_HailleBell",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_4",
-      "title": "tiny_dancers_4 (3-4)",
-      "start": "2026-07-09T16:55:00",
-      "end": "2026-07-09T17:40:00",
-      "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_JessicaF",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_5",
-      "title": "tiny_dancers_5 (3-4)",
-      "start": "2026-07-06T16:00:00",
-      "end": "2026-07-06T16:45:00",
-      "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_EmilyJ",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_6",
-      "title": "tiny_dancers_6 (3-4)",
-      "start": "2026-07-08T16:35:00",
-      "end": "2026-07-08T17:20:00",
-      "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_Morganne",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_7",
-      "title": "tiny_dancers_7 (3-4)",
       "start": "2026-07-07T16:05:00",
       "end": "2026-07-07T16:50:00",
       "extendedProps": {
@@ -679,38 +609,10 @@
       }
     },
     {
-      "id": "tiny_dancers_8",
-      "title": "tiny_dancers_8 (3-4)",
-      "start": "2026-07-09T16:10:00",
-      "end": "2026-07-09T16:55:00",
-      "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_JessicaF",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_9",
-      "title": "tiny_dancers_9 (3-4)",
-      "start": "2026-07-06T17:35:00",
-      "end": "2026-07-06T18:20:00",
-      "extendedProps": {
-        "room_id": "room_3",
-        "teacher_id": "teacher_HayleyTipton",
-        "style": "tinydancers",
-        "cohort": "3-4",
-        "is_pinned_teacher": false,
-        "is_pinned_time": false
-      }
-    },
-    {
-      "id": "tiny_dancers_10",
-      "title": "tiny_dancers_10 (3-4)",
-      "start": "2026-07-08T17:20:00",
-      "end": "2026-07-08T18:05:00",
+      "id": "tiny_dancers_3",
+      "title": "tiny_dancers_3 (3-4)",
+      "start": "2026-07-06T17:30:00",
+      "end": "2026-07-06T18:15:00",
       "extendedProps": {
         "room_id": "room_6",
         "teacher_id": "teacher_Catherine",
@@ -721,10 +623,66 @@
       }
     },
     {
-      "id": "tiny_dancers_11",
-      "title": "tiny_dancers_11 (3-4)",
-      "start": "2026-07-07T17:40:00",
-      "end": "2026-07-07T18:25:00",
+      "id": "tiny_dancers_4",
+      "title": "tiny_dancers_4 (3-4)",
+      "start": "2026-07-09T17:45:00",
+      "end": "2026-07-09T18:30:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_HailleBell",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_5",
+      "title": "tiny_dancers_5 (3-4)",
+      "start": "2026-07-08T16:40:00",
+      "end": "2026-07-08T17:25:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_Morganne",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_6",
+      "title": "tiny_dancers_6 (3-4)",
+      "start": "2026-07-08T17:25:00",
+      "end": "2026-07-08T18:10:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_Catherine",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_7",
+      "title": "tiny_dancers_7 (3-4)",
+      "start": "2026-07-07T16:50:00",
+      "end": "2026-07-07T17:35:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_EmilyJ",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_8",
+      "title": "tiny_dancers_8 (3-4)",
+      "start": "2026-07-09T17:40:00",
+      "end": "2026-07-09T18:25:00",
       "extendedProps": {
         "room_id": "room_5",
         "teacher_id": "teacher_Morganne",
@@ -735,13 +693,55 @@
       }
     },
     {
+      "id": "tiny_dancers_9",
+      "title": "tiny_dancers_9 (3-4)",
+      "start": "2026-07-06T16:00:00",
+      "end": "2026-07-06T16:45:00",
+      "extendedProps": {
+        "room_id": "room_2",
+        "teacher_id": "teacher_Stephanie",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_10",
+      "title": "tiny_dancers_10 (3-4)",
+      "start": "2026-07-09T16:10:00",
+      "end": "2026-07-09T16:55:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_JessicaF",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
+      "id": "tiny_dancers_11",
+      "title": "tiny_dancers_11 (3-4)",
+      "start": "2026-07-06T16:45:00",
+      "end": "2026-07-06T17:30:00",
+      "extendedProps": {
+        "room_id": "room_6",
+        "teacher_id": "teacher_HayleyTipton",
+        "style": "tinydancers",
+        "cohort": "3-4",
+        "is_pinned_teacher": false,
+        "is_pinned_time": false
+      }
+    },
+    {
       "id": "tiny_tots_1",
       "title": "tiny_tots_1 (2)",
-      "start": "2026-07-09T16:55:00",
-      "end": "2026-07-09T17:25:00",
+      "start": "2026-07-09T16:00:00",
+      "end": "2026-07-09T16:30:00",
       "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_Stephanie",
+        "room_id": "room_5",
+        "teacher_id": "teacher_HailleBell",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -751,11 +751,11 @@
     {
       "id": "tiny_tots_2",
       "title": "tiny_tots_2 (2)",
-      "start": "2026-07-06T16:30:00",
-      "end": "2026-07-06T17:00:00",
+      "start": "2026-07-06T16:45:00",
+      "end": "2026-07-06T17:15:00",
       "extendedProps": {
-        "room_id": "room_2",
-        "teacher_id": "teacher_Catherine",
+        "room_id": "room_5",
+        "teacher_id": "teacher_Stephanie",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -765,8 +765,8 @@
     {
       "id": "tiny_tots_3",
       "title": "tiny_tots_3 (2)",
-      "start": "2026-07-07T16:25:00",
-      "end": "2026-07-07T16:55:00",
+      "start": "2026-07-07T16:15:00",
+      "end": "2026-07-07T16:45:00",
       "extendedProps": {
         "room_id": "room_6",
         "teacher_id": "teacher_EmilyJ",
@@ -779,11 +779,11 @@
     {
       "id": "tiny_tots_4",
       "title": "tiny_tots_4 (2)",
-      "start": "2026-07-08T16:05:00",
-      "end": "2026-07-08T16:35:00",
+      "start": "2026-07-06T16:10:00",
+      "end": "2026-07-06T16:40:00",
       "extendedProps": {
-        "room_id": "room_6",
-        "teacher_id": "teacher_Stephanie",
+        "room_id": "room_5",
+        "teacher_id": "teacher_Catherine",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -793,11 +793,11 @@
     {
       "id": "tiny_tots_5",
       "title": "tiny_tots_5 (2)",
-      "start": "2026-07-07T17:05:00",
-      "end": "2026-07-07T17:35:00",
+      "start": "2026-07-09T16:30:00",
+      "end": "2026-07-09T17:00:00",
       "extendedProps": {
-        "room_id": "room_4",
-        "teacher_id": "teacher_Morganne",
+        "room_id": "room_2",
+        "teacher_id": "teacher_HailleBell",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -807,11 +807,11 @@
     {
       "id": "tiny_tots_6",
       "title": "tiny_tots_6 (2)",
-      "start": "2026-07-08T16:35:00",
-      "end": "2026-07-08T17:05:00",
+      "start": "2026-07-08T17:00:00",
+      "end": "2026-07-08T17:30:00",
       "extendedProps": {
         "room_id": "room_5",
-        "teacher_id": "teacher_HailleBell",
+        "teacher_id": "teacher_Stephanie",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -821,11 +821,11 @@
     {
       "id": "tiny_tots_7",
       "title": "tiny_tots_7 (2)",
-      "start": "2026-07-06T17:00:00",
-      "end": "2026-07-06T17:30:00",
+      "start": "2026-07-08T17:30:00",
+      "end": "2026-07-08T18:00:00",
       "extendedProps": {
         "room_id": "room_5",
-        "teacher_id": "teacher_HailleBell",
+        "teacher_id": "teacher_Morganne",
         "style": "tinytots",
         "cohort": "2",
         "is_pinned_teacher": false,
@@ -835,10 +835,10 @@
     {
       "id": "tippy_toes",
       "title": "tippy_toes (5-7)",
-      "start": "2026-07-06T17:30:00",
-      "end": "2026-07-06T18:30:00",
+      "start": "2026-07-09T15:30:00",
+      "end": "2026-07-09T16:30:00",
       "extendedProps": {
-        "room_id": "room_6",
+        "room_id": "room_2",
         "teacher_id": "teacher_Stephanie",
         "style": "tippytoes",
         "cohort": "5-7",
@@ -849,8 +849,8 @@
     {
       "id": "tiny_tumblers",
       "title": "tiny_tumblers (3-4)",
-      "start": "2026-07-07T16:55:00",
-      "end": "2026-07-07T17:40:00",
+      "start": "2026-07-09T16:55:00",
+      "end": "2026-07-09T17:40:00",
       "extendedProps": {
         "room_id": "room_6",
         "teacher_id": "teacher_Katie",
@@ -863,11 +863,11 @@
     {
       "id": "first_steps",
       "title": "first_steps (baby)",
-      "start": "2026-07-08T16:00:00",
-      "end": "2026-07-08T16:30:00",
+      "start": "2026-07-08T16:30:00",
+      "end": "2026-07-08T17:00:00",
       "extendedProps": {
-        "room_id": "room_3",
-        "teacher_id": "teacher_Catherine",
+        "room_id": "room_5",
+        "teacher_id": "teacher_HailleBell",
         "style": "littles",
         "cohort": "baby",
         "is_pinned_teacher": false,
@@ -877,8 +877,8 @@
     {
       "id": "strength_flex",
       "title": "strength_flex (all)",
-      "start": "2026-07-07T18:00:00",
-      "end": "2026-07-07T18:50:00",
+      "start": "2026-07-07T19:25:00",
+      "end": "2026-07-07T20:15:00",
       "extendedProps": {
         "room_id": "room_3",
         "teacher_id": "teacher_Katie",
@@ -1241,8 +1241,8 @@
     {
       "id": "connections",
       "title": "connections (all)",
-      "start": "2026-07-07T17:00:00",
-      "end": "2026-07-07T18:00:00",
+      "start": "2026-07-07T17:15:00",
+      "end": "2026-07-07T18:15:00",
       "extendedProps": {
         "room_id": "room_3",
         "teacher_id": "teacher_HailleBell",
