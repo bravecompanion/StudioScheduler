@@ -272,6 +272,16 @@ class StudioSchedulerModel:
         if hayley_tiny_dancers:
             self.model.Add(sum(hayley_tiny_dancers) <= 1)
 
+
+        # 2. Katie doesn't want to teach 2 jazz 6-8's
+        katie_6_8_jazz = []
+        for c in self.classes:
+            if c.style == 'jazz' and c.cohort == '6-8' and 'Katie' in self.class_vars[c.id].get('teacher_presences', {}):
+                katie_6_8_jazz.append(self.class_vars[c.id]['teacher_presences']['Katie'])
+
+        if katie_6_8_jazz:
+            self.model.Add(sum(katie_6_8_jazz) <= 1)
+
     def add_soft_constraints(self):
         #self._penalize_late_young_classes()
         self._penalize_session_clustering()
@@ -354,6 +364,9 @@ class StudioSchedulerModel:
 
     def _penalize_overlapping_sessions(self):
         """Soft Constraint: Penalize scheduling 2 sessions of the same class at overlapping times."""
+
+        PENALTY_MULT = 500
+
         # Group classes by base name
         base_class_groups = defaultdict(list)
         for c in self.classes:
@@ -384,12 +397,14 @@ class StudioSchedulerModel:
                     self.model.AddBoolOr([b_e1_le_s2, b_e2_le_s1]).OnlyEnforceIf(b_overlap.Not())
                     
                     # High penalty to strongly discourage it
-                    self.penalties.append(b_overlap * 500)
+                    self.penalties.append(b_overlap * PENALTY_MULT)
 
     def _manage_cohort_overlaps(self):
         """Hard/Soft Constraint: Prevent or penalize overlaps between different classes in the same cohort."""
         import re
         from collections import defaultdict
+
+        PENALTY_MULT = 200
         
         # Group classes by cohort
         cohort_groups = defaultdict(list)
@@ -439,7 +454,7 @@ class StudioSchedulerModel:
                         self.model.Add(b_overlap == 0)
                     else:
                         # Soft constraint: minor penalty
-                        self.penalties.append(b_overlap * 20)
+                        self.penalties.append(b_overlap * PENALTY_MULT)
 
     def _penalize_teacher_class_monopoly(self):
         """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
@@ -514,8 +529,8 @@ class StudioSchedulerModel:
                 self.penalties.append(count_sq * PENALTY_MULT)
 
     def _penalize_teacher_schedule_span(self):
-        """Soft Constraint: Minimize the daily span of classes for a teacher to compact their schedule."""
-        PENALTY_MULT=4
+        """Soft Constraint: Penalize idle/gap time in a teacher's daily schedule (span minus teaching time)."""
+        PENALTY_MULT=5
         for t in self.teachers:
             if not self.teacher_intervals[t.id]: continue
                 
@@ -525,6 +540,7 @@ class StudioSchedulerModel:
                 
                 starts = []
                 ends = []
+                durations_on_day = []
                 
                 for c in self.classes:
                     if c.id not in self.class_vars: continue
@@ -553,8 +569,14 @@ class StudioSchedulerModel:
                     self.model.Add(safe_end == end_var).OnlyEnforceIf(is_active_class)
                     self.model.Add(safe_end == day_base).OnlyEnforceIf(is_active_class.Not())
                     
+                    # Track teaching duration on this day
+                    dur_on_day = self.model.NewIntVar(0, c.duration_epochs, f'span_dur_{c.id}_{t.id}_{d_idx}')
+                    self.model.Add(dur_on_day == c.duration_epochs).OnlyEnforceIf(is_active_class)
+                    self.model.Add(dur_on_day == 0).OnlyEnforceIf(is_active_class.Not())
+                    
                     starts.append(safe_start)
                     ends.append(safe_end)
+                    durations_on_day.append(dur_on_day)
                     
                 if not starts: continue
                     
@@ -565,7 +587,15 @@ class StudioSchedulerModel:
                 
                 span = self.model.NewIntVar(0, self.day_duration_epochs, f'span_{t.id}_{d_idx}')
                 self.model.AddMaxEquality(span, [0, max_end - min_start])
-                self.penalties.append(span * PENALTY_MULT)
+                
+                total_teaching = self.model.NewIntVar(0, self.day_duration_epochs, f'teaching_{t.id}_{d_idx}')
+                self.model.Add(total_teaching == sum(durations_on_day))
+                
+                # Gap time = span - teaching time (idle time sitting around between classes)
+                gap_time = self.model.NewIntVar(0, self.day_duration_epochs, f'gap_{t.id}_{d_idx}')
+                self.model.AddMaxEquality(gap_time, [0, span - total_teaching])
+                
+                self.penalties.append(gap_time * PENALTY_MULT)
 
     def _penalize_teacher_days_requested(self):
         """Soft Constraint: Penalize if a teacher is active on more or fewer days than they requested."""
