@@ -11,6 +11,8 @@ class Teacher:
     id: str
     availability: Dict[str, Dict[str, Optional[int]]]
     days_requested: Optional[int] = None
+    hate_classes: List[str] = field(default_factory=list)
+    hate_cohorts: List[str] = field(default_factory=list)
 
 @dataclass
 class ClassSession:

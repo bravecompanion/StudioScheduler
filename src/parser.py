@@ -96,10 +96,15 @@ def load_data(
                     end_epoch = time_to_epochs(times.get('end', ''), cal)
                     availability[day_str] = {'start': start_epoch, 'end': end_epoch}
         
+        hate_classes = [str(s).lower() for s in t_data.get('hate_class', []) or []]
+        hate_cohorts = [str(c).strip().replace('"', '') for c in t_data.get('hate_cohort', []) or []]
+        
         teachers.append(Teacher(
             id=t_id,
             availability=availability,
-            days_requested=t_data.get('days_requested')
+            days_requested=t_data.get('days_requested'),
+            hate_classes=hate_classes,
+            hate_cohorts=hate_cohorts
         ))
         
     # 3. Load Teacher Options (Routing table)
