@@ -1,494 +1,494 @@
 Meredith:
   availability:
     TUE:
-      start: '990'
-      end: '1260'
+      start: 4:30 PM
+      end: 9:00 PM
     THU:
-      start: '990'
-      end: '1260'
+      start: 4:30 PM
+      end: 9:00 PM
   love_class:
-  - ballet
-  - pointe
-  - pre-pointe
-  - jazz
+    - ballet
+    - pointe
+    - pre-pointe
+    - jazz
   hate_class:
-  - tap
-  - hiphop
+    - tap
+    - hiphop
   love_cohort:
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 5-7
+    - baby
+    - '2'
+    - 3-4
+    - 5-7
   days_requested: 2
 HailleBell:
   availability:
     MON:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     TUE:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     WED:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     THU:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
   love_class:
-  - jazz
-  - contemporary
-  - hiphop
+    - jazz
+    - contemporary
+    - hiphop
   hate_class:
-  - tap
-  - ballet
-  - bittyboppers
+    - tap
+    - ballet
+    - bittyboppers
   love_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - baby
+    - '2'
+    - 3-4
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - 5-7
+    - 5-7
   days_requested: 4
 Katie:
   availability:
     MON:
-      start: '930'
-      end: '1110'
+      start: 3:30 PM
+      end: 6:30 PM
     TUE:
-      start: '930'
-      end: '1110'
+      start: 3:30 PM
+      end: 6:30 PM
     WED:
-      start: '930'
-      end: '1110'
+      start: 3:30 PM
+      end: 6:30 PM
     THU:
-      start: '930'
-      end: '1110'
+      start: 3:30 PM
+      end: 6:30 PM
   days_requested: 3
   love_class:
-  - jazz
+    - jazz
   hate_class:
-  - tap
+    - tap
   love_cohort:
-  - 5-7
-  - 6-8
-  - advanced
+    - 5-7
+    - 6-8
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 12+
+    - baby
+    - '2'
+    - 12+
 HayleyTipton:
   availability:
     MON:
-      start: '945'
-      end: '1110'
+      start: 3:45 PM
+      end: 6:30 PM
     WED:
-      start: '945'
-      end: '1110'
+      start: 3:45 PM
+      end: 6:30 PM
   days_requested: 2
   love_class:
-  - jazz
-  - hiphop
-  - sidekicks
-  - tinydancers
+    - jazz
+    - hiphop
+    - sidekicks
+    - tinydancers
   hate_class:
-  - bittyboppers
-  - tippytoes
+    - bittyboppers
+    - tippytoes
   love_cohort:
-  - 3-4
-  - 5-7
-  - 6-8
+    - 3-4
+    - 5-7
+    - 6-8
   hate_cohort:
-  - 9-12
-  - 12+
+    - 9-12
+    - 12+
 JessicaF:
   availability:
     THU:
-      start: '945'
-      end: '1140'
+      start: 3:45 PM
+      end: 7:00 PM
   days_requested: 1
   love_class:
-  - contemporary
-  - ballet
-  - tap
+    - contemporary
+    - ballet
+    - tap
   hate_class: null
   love_cohort:
-  - 3-4
-  - 5-7
-  - 6-8
+    - 3-4
+    - 5-7
+    - 6-8
   hate_cohort: null
 Jordan:
   availability:
     MON:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     TUE:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     WED:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     THU:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
   days_requested: 1
   love_class:
-  - acro
-  - jazz
+    - acro
+    - jazz
   hate_class:
-  - ballet
-  - contemporary
+    - ballet
+    - contemporary
   love_cohort:
-  - 5-7
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - 5-7
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
+    - baby
+    - '2'
+    - 3-4
 EmilyJ:
   availability:
     MON:
-      start: '990'
-      end: '1105'
+      start: 4:30 PM
+      end: 6:25 PM
     TUE:
-      start: '990'
-      end: '1200'
+      start: 4:30 PM
+      end: 8:00 PM
     WED:
-      start: '990'
-      end: '1200'
+      start: 4:30 PM
+      end: 8:00 PM
     THU:
-      start: '960'
-      end: '1200'
+      start: 4:00 PM
+      end: 8:00 PM
   days_requested: 3
   love_class:
-  - jazz
-  - tinydancers
-  - tinytots
-  - sidekicks
+    - jazz
+    - tinydancers
+    - tinytots
+    - sidekicks
   hate_class:
-  - acro
+    - acro
   love_cohort:
-  - '2'
-  - 3-4
-  - 9-12
-  - advanced
+    - '2'
+    - 3-4
+    - 9-12
+    - advanced
   hate_cohort:
-  - baby
-  - 5-7
+    - baby
+    - 5-7
 Morganne:
   availability:
     TUE:
-      start: '975'
-      end: '1260'
+      start: 4:15 PM
+      end: 9:00 PM
     WED:
-      start: '975'
-      end: '1260'
+      start: 4:15 PM
+      end: 9:00 PM
     THU:
-      start: '975'
-      end: '1260'
+      start: 4:15 PM
+      end: 9:00 PM
   days_requested: 3
   love_class:
-  - ballet
-  - tinytots
-  - tinydancers
-  - tippytoes
-  - jazz
-  - contemporary
+    - ballet
+    - tinytots
+    - tinydancers
+    - tippytoes
+    - jazz
+    - contemporary
   hate_class:
-  - hiphop
+    - hiphop
   love_cohort:
-  - '2'
-  - 3-4
-  - 5-7
-  - 12+
-  - advanced
+    - '2'
+    - 3-4
+    - 5-7
+    - 12+
+    - advanced
   hate_cohort: null
 Courteney:
   availability:
     TUE:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     WED:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     THU:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
   days_requested: 1
   love_class:
-  - hiphop
-  - contemporary
+    - hiphop
+    - contemporary
   hate_class:
-  - tap
-  - acro
+    - tap
+    - acro
   love_cohort:
-  - 9-12
-  - 12+
-  - advanced
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 5-7
-  - 6-8
+    - baby
+    - '2'
+    - 3-4
+    - 5-7
+    - 6-8
 Kristian:
   availability:
     MON:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     WED:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     THU:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
   days_requested: 2
   love_class:
-  - conditioning
-  - jazz
-  - sidekicks
+    - conditioning
+    - jazz
+    - sidekicks
   hate_class:
-  - tap
-  - ballet
+    - tap
+    - ballet
   love_cohort:
-  - 5-7
-  - 6-8
-  - 9-12
-  - 12+
+    - 5-7
+    - 6-8
+    - 9-12
+    - 12+
   hate_cohort:
-  - baby
-  - '2'
+    - baby
+    - '2'
 Catherine:
   availability:
     MON:
-      start: '960'
-      end: '1140'
+      start: 4:00 PM
+      end: 7:00 PM
     WED:
-      start: '960'
-      end: '1140'
+      start: 4:00 PM
+      end: 7:00 PM
   days_requested: 2
   love_class:
-  - jazz
-  - ballet
-  - contemporary
+    - jazz
+    - ballet
+    - contemporary
   hate_class:
-  - tap
+    - tap
   love_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 5-7
-  - 6-8
+    - baby
+    - '2'
+    - 3-4
+    - 5-7
+    - 6-8
   hate_cohort:
-  - 9-12
-  - 12+
-  - advanced
+    - 9-12
+    - 12+
+    - advanced
 Stephanie:
   availability:
     MON:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     TUE:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     WED:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     THU:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
   days_requested: 4
   love_class:
-  - tap
-  - sidekicks
-  - connections
-  - company
-  - acro
-  - tinytots
-  - tinydancers
-  - tippytoes
-  - jazz
+    - tap
+    - sidekicks
+    - connections
+    - company
+    - acro
+    - tinytots
+    - tinydancers
+    - tippytoes
+    - jazz
   love_cohort:
-  - 3-4
-  - 5-7
-  - 6-8
-  - 9-12
-  - advanced
+    - 3-4
+    - 5-7
+    - 6-8
+    - 9-12
+    - advanced
   hate_cohort:
-  - baby
-  - 12+
+    - baby
+    - 12+
 Braly:
   availability:
     TUE:
-      start: '990'
-      end: '1260'
+      start: 4:30 PM
+      end: 9:00 PM
     WED:
-      start: '990'
-      end: '1260'
+      start: 4:30 PM
+      end: 9:00 PM
   days_requested: 2
   love_class:
-  - ballet
+    - ballet
   hate_class:
-  - tap
+    - tap
   love_cohort:
-  - 9-12
-  - 12+
-  - advanced
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort: null
 Lauren:
   availability:
     MON:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     WED:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     THU:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
   days_requested: 1
   love_class:
-  - tap
-  - jazz
-  - contemporary
+    - tap
+    - jazz
+    - contemporary
   hate_class:
-  - hiphop
-  - acro
+    - hiphop
+    - acro
   love_cohort:
-  - 9-12
-  - 12+
-  - advanced
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 5-7
+    - baby
+    - '2'
+    - 3-4
+    - 5-7
 Cameron:
   availability:
     MON:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     TUE:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     WED:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     THU:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
   days_requested: 4
   love_class:
-  - jazz
-  - conditioning
-  - contemporary
+    - jazz
+    - conditioning
+    - contemporary
   hate_class:
-  - ballet
+    - ballet
   love_cohort:
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
+    - baby
+    - '2'
+    - 3-4
 Ben:
   availability:
     WED:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
     THU:
-      start: '930'
-      end: '1260'
+      start: 3:30 PM
+      end: 9:00 PM
   days_requested: 2
   love_class:
-  - tap
-  - hiphop
+    - tap
+    - hiphop
   hate_class:
-  - ballet
+    - ballet
   love_cohort:
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
+    - baby
+    - '2'
+    - 3-4
 Shelby:
   availability:
     WED:
-      start: '930'
-      end: '1190'
+      start: 3:30 PM
+      end: 7:50 PM
   days_requested: 1
   love_class:
-  - jazz
-  - contemporary
+    - jazz
+    - contemporary
   hate_class:
-  - hiphop
-  - ballet
-  - tap
+    - hiphop
+    - ballet
+    - tap
   love_cohort:
-  - advanced
+    - advanced
   hate_cohort: null
 Amanda:
   availability:
     MON:
-      start: '1035'
-      end: '1260'
+      start: 5:15 PM
+      end: 9:00 PM
     TUE:
-      start: '1035'
-      end: '1260'
+      start: 5:15 PM
+      end: 9:00 PM
   days_requested: 1
   love_class:
-  - ballet
+    - ballet
   hate_class:
-  - tap
+    - tap
   love_cohort:
-  - 6-8
-  - 9-12
-  - advanced
+    - 6-8
+    - 9-12
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 12+
+    - baby
+    - '2'
+    - 3-4
+    - 12+
 Qs:
   availability:
     MON:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
     TUE:
-      start: '960'
-      end: '1260'
+      start: 4:00 PM
+      end: 9:00 PM
   days_requested: 2
   love_class:
-  - jazz
-  - ballet
-  - contemporary
+    - jazz
+    - ballet
+    - contemporary
   hate_class:
-  - tap
-  - acro
-  - hiphop
+    - tap
+    - acro
+    - hiphop
   love_cohort:
-  - 6-8
-  - 9-12
-  - 12+
-  - advanced
+    - 6-8
+    - 9-12
+    - 12+
+    - advanced
   hate_cohort:
-  - baby
-  - '2'
-  - 3-4
-  - 5-7
+    - baby
+    - '2'
+    - 3-4
+    - 5-7
