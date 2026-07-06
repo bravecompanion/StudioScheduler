@@ -232,13 +232,14 @@ class StudioSchedulerModel:
             self.model.Add(sum(hayley_tiny_dancers) <= 1)
 
     def add_soft_constraints(self):
-        self._penalize_late_young_classes()
+        #self._penalize_late_young_classes()
         self._penalize_session_clustering()
         self._penalize_session_time_clustering()
         self._penalize_teacher_schedule_span()
         self._penalize_teacher_days_requested()
         self._reward_cohort_bunching()
         self._penalize_overlapping_sessions()
+        self._penalize_teacher_class_monopoly()
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -342,6 +343,40 @@ class StudioSchedulerModel:
                     
                     # High penalty to strongly discourage it
                     self.penalties.append(b_overlap * 500)
+
+    def _penalize_teacher_class_monopoly(self):
+        """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
+        import re
+        from collections import defaultdict
+
+        CLASS_CUTOFF = 2
+        PENALTY_MULT = 500
+        
+        base_class_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_groups[base_name].append(c)
+            
+        for base_name, class_list in base_class_groups.items():
+            if len(class_list) <= 1:
+                continue
+                
+            for t in self.teachers:
+                t_presences = []
+                for c in class_list:
+                    if t.id in self.class_vars[c.id]['teacher_presences']:
+                        t_presences.append(self.class_vars[c.id]['teacher_presences'][t.id])
+                
+                if len(t_presences) > CLASS_CUTOFF:
+                    total_sessions = sum(t_presences)
+                    
+                    excess = self.model.NewIntVar(0, len(t_presences), f'excess_monopoly_{t.id}_{base_name}')
+                    # excess = max(0, total_sessions - 2)
+                    self.model.AddMaxEquality(excess, [0, total_sessions - 2])
+                    
+                    # High penalty per excess class over 2
+                    self.penalties.append(excess * PENALTY_MULT)
 
     def _penalize_session_time_clustering(self):
         """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
@@ -646,11 +681,11 @@ class StudioSchedulerModel:
         
         solver = cp_model.CpSolver()
         solver.parameters.log_search_progress = True
-        solver.parameters.max_time_in_seconds = 300.0
-        solver.parameters.num_search_workers = 24
+        solver.parameters.max_time_in_seconds = 150.0
+        solver.parameters.num_search_workers = 27
         
         # Stop early if no improvement is found for 30 seconds
-        callback = PlateauStoppingCallback(solver, plateau_time_limit=60.0)
+        callback = PlateauStoppingCallback(solver, plateau_time_limit=100.0)
         
         print("Starting solver...")
         status = solver.Solve(self.model, callback)
