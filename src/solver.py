@@ -760,17 +760,26 @@ class StudioSchedulerModel:
         schedule compactness for the cohort.
         """
         import re
+        from collections import defaultdict
         
         SAME_CLASS_MULT = 0    # Light signal for sessions of the same class
         DIFF_CLASS_MULT = 3    # Stronger signal for different classes in the cohort
+        SINGLETON_MULT = 1     # Global signal for singletons to pull them to the same day
         
-        cohort_groups = {}
+        # Pre-calculate session counts per base class to identify singletons
+        base_class_counts = defaultdict(int)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_counts[base_name] += 1
+            
+        cohort_groups = defaultdict(list)
         for c in self.classes:
             if c.id not in self.class_vars: continue
             if not c.cohort or c.cohort.lower() == 'all': continue
-            if c.cohort not in cohort_groups:
-                cohort_groups[c.cohort] = []
             cohort_groups[c.cohort].append(c)
+            
+        max_global_diff = self.cal.day_offset * len(self.cal.days)
             
         for cohort, class_list in cohort_groups.items():
             if len(class_list) <= 1:
@@ -781,37 +790,40 @@ class StudioSchedulerModel:
                     c1 = class_list[i]
                     c2 = class_list[j]
                     
+                    base1 = re.sub(r'_\d+$', '', c1.id)
+                    base2 = re.sub(r'_\d+$', '', c2.id)
+                    
                     s1 = self.class_vars[c1.id]['start']
                     s2 = self.class_vars[c2.id]['start']
                     
-                    # Determine if they're on the same day
-                    day1 = self.model.NewIntVar(0, len(self.cal.days) - 1, f'cdist_day1_{c1.id}_{c2.id}')
-                    day2 = self.model.NewIntVar(0, len(self.cal.days) - 1, f'cdist_day2_{c1.id}_{c2.id}')
-                    self.model.AddDivisionEquality(day1, s1, self.cal.day_offset)
-                    self.model.AddDivisionEquality(day2, s2, self.cal.day_offset)
-                    
-                    same_day = self.model.NewBoolVar(f'cdist_same_day_{c1.id}_{c2.id}')
-                    self.model.Add(day1 == day2).OnlyEnforceIf(same_day)
-                    self.model.Add(day1 != day2).OnlyEnforceIf(same_day.Not())
-                    
-                    # Compute |start1 - start2| only when on the same day
-                    diff = self.model.NewIntVar(-self.day_duration_epochs, self.day_duration_epochs, f'cdist_diff_{c1.id}_{c2.id}')
+                    # Compute global distance |start1 - start2|
+                    diff = self.model.NewIntVar(-max_global_diff, max_global_diff, f'cdist_diff_{c1.id}_{c2.id}')
                     self.model.Add(diff == s1 - s2)
                     
-                    abs_diff = self.model.NewIntVar(0, self.day_duration_epochs, f'cdist_abs_{c1.id}_{c2.id}')
+                    abs_diff = self.model.NewIntVar(0, max_global_diff, f'cdist_abs_{c1.id}_{c2.id}')
                     self.model.AddAbsEquality(abs_diff, diff)
                     
-                    # Only penalize when on same day
-                    penalized_dist = self.model.NewIntVar(0, self.day_duration_epochs, f'cdist_pen_{c1.id}_{c2.id}')
-                    self.model.Add(penalized_dist == abs_diff).OnlyEnforceIf(same_day)
-                    self.model.Add(penalized_dist == 0).OnlyEnforceIf(same_day.Not())
-                    
-                    # Stronger weight for different classes
-                    base1 = re.sub(r'_\d+$', '', c1.id)
-                    base2 = re.sub(r'_\d+$', '', c2.id)
-                    weight = DIFF_CLASS_MULT if base1 != base2 else SAME_CLASS_MULT
-                    
-                    self.penalties.append(penalized_dist * weight)
+                    # If BOTH are singletons of DIFFERENT classes
+                    if base1 != base2 and base_class_counts[base1] == 1 and base_class_counts[base2] == 1:
+                        # Apply global distance penalty: pulls them onto the same day, then pulls them close
+                        self.penalties.append(abs_diff * SINGLETON_MULT)
+                    else:
+                        # MULTIPLE sessions. Only penalize if on the same day.
+                        day1 = self.model.NewIntVar(0, len(self.cal.days) - 1, f'cdist_day1_{c1.id}_{c2.id}')
+                        day2 = self.model.NewIntVar(0, len(self.cal.days) - 1, f'cdist_day2_{c1.id}_{c2.id}')
+                        self.model.AddDivisionEquality(day1, s1, self.cal.day_offset)
+                        self.model.AddDivisionEquality(day2, s2, self.cal.day_offset)
+                        
+                        same_day = self.model.NewBoolVar(f'cdist_same_day_{c1.id}_{c2.id}')
+                        self.model.Add(day1 == day2).OnlyEnforceIf(same_day)
+                        self.model.Add(day1 != day2).OnlyEnforceIf(same_day.Not())
+                        
+                        penalized_dist = self.model.NewIntVar(0, max_global_diff, f'cdist_pen_{c1.id}_{c2.id}')
+                        self.model.Add(penalized_dist == abs_diff).OnlyEnforceIf(same_day)
+                        self.model.Add(penalized_dist == 0).OnlyEnforceIf(same_day.Not())
+                        
+                        weight = DIFF_CLASS_MULT if base1 != base2 else SAME_CLASS_MULT
+                        self.penalties.append(penalized_dist * weight)
 
     def validate_inputs(self):
         """Sanity checker that runs before the CP-SAT engine to find impossible constraints."""
