@@ -11,7 +11,7 @@ contemporary_12plus,contemporary,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 
 contemporary_6to9_1,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
 contemporary_6to9_2,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
 contemporary_9to12,contemporary,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
-acro,acro,"""9-18""",9,18,60,20,Jordan,Tuesday-15:45,3,,03:45:00 PM,08:30:00 PM
+acro,acro,"""9-18""",9,18,75,20,Jordan,Tuesday-16:00,3,,,
 hiphop_12plus,hiphop,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
 hiphop_6to8_1,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
 hiphop_6to8_2,hiphop,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
@@ -80,7 +80,7 @@ contemporary_adv_sr,contemporary,,16,18,55,20,Shelby,Wednesday-16:00,2,,,
 contemporary_adv_jr,contemporary,,16,18,55,20,Shelby,Wednesday-18:00,2,,,
 contemporary_adv_mini,contemporary,,8,10,55,20,Shelby,Wednesday-18:55,2,,,
 jazz_adv_teen,jazz,,12,14,90,20,Cameron,Thursday-17:00,2,,,
-connections,connections,,,,60,20,Meredith/Courteney/HailleBell/Morganne/Stephanie ,Tuesday-17:00,3,,,
+connections,connections,,,,60,20,Meredith/Courteney/HailleBell/Morganne/Stephanie ,Tuesday-17:15,3,,,
 ballet_green,ballet,,8,10,90,20,Braly,Wednesday-16:30,3,,,
 ballet_adv_teen,ballet,,14,16,90,20,Braly,Wednesday-18:00,3,,,
 jazz_adv_jr,jazz,,12,14,85,20,EmilyJ,Thursday-16:00,3,,,
