@@ -218,6 +218,47 @@ class StudioSchedulerModel:
             if intervals:
                 self.model.AddNoOverlap(intervals)
                 
+        # Ensure teachers have > 1 hour every day they teach
+        for t in self.teachers:
+            for d_idx, day_str in enumerate(self.cal.days):
+                class_durations_on_day = []
+                
+                for c in self.classes:
+                    if c.id not in self.class_vars: continue
+                    if t.id not in self.class_vars[c.id]['teacher_presences']: continue
+                    
+                    presence = self.class_vars[c.id]['teacher_presences'][t.id]
+                    start_var = self.class_vars[c.id]['start']
+                    
+                    day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'min_hr_day_idx_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                    
+                    is_on_day = self.model.NewBoolVar(f'min_hr_is_on_day_{c.id}_{t.id}_{d_idx}')
+                    self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                    self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                    
+                    is_active = self.model.NewBoolVar(f'min_hr_active_{c.id}_{t.id}_{d_idx}')
+                    self.model.AddBoolAnd([presence, is_on_day]).OnlyEnforceIf(is_active)
+                    self.model.AddBoolOr([presence.Not(), is_on_day.Not()]).OnlyEnforceIf(is_active.Not())
+                    
+                    dur_on_day = self.model.NewIntVar(0, c.duration_epochs, f'dur_{c.id}_{t.id}_{d_idx}')
+                    self.model.Add(dur_on_day == c.duration_epochs).OnlyEnforceIf(is_active)
+                    self.model.Add(dur_on_day == 0).OnlyEnforceIf(is_active.Not())
+                    
+                    class_durations_on_day.append(dur_on_day)
+                    
+                if not class_durations_on_day: continue
+                
+                total_dur = self.model.NewIntVar(0, sum(c.duration_epochs for c in self.classes), f'total_dur_{t.id}_{d_idx}')
+                self.model.Add(total_dur == sum(class_durations_on_day))
+                
+                is_working = self.model.NewBoolVar(f'is_working_{t.id}_{d_idx}')
+                self.model.Add(total_dur > 0).OnlyEnforceIf(is_working)
+                self.model.Add(total_dur == 0).OnlyEnforceIf(is_working.Not())
+                
+                # Enforce > 12 epochs (> 60 minutes)
+                self.model.Add(total_dur > 12).OnlyEnforceIf(is_working)
+                
         self._add_one_off_custom_constraints()
 
     def _add_one_off_custom_constraints(self):
@@ -239,6 +280,7 @@ class StudioSchedulerModel:
         self._penalize_teacher_days_requested()
         self._reward_cohort_bunching()
         self._penalize_overlapping_sessions()
+        self._manage_cohort_overlaps()
         self._penalize_teacher_class_monopoly()
         
         if self.penalties:
@@ -343,6 +385,61 @@ class StudioSchedulerModel:
                     
                     # High penalty to strongly discourage it
                     self.penalties.append(b_overlap * 500)
+
+    def _manage_cohort_overlaps(self):
+        """Hard/Soft Constraint: Prevent or penalize overlaps between different classes in the same cohort."""
+        import re
+        from collections import defaultdict
+        
+        # Group classes by cohort
+        cohort_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            cohort_groups[c.cohort].append(c)
+            
+        # Also pre-calculate the number of sessions for each base class
+        base_class_counts = defaultdict(int)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_counts[base_name] += 1
+            
+        for cohort, class_list in cohort_groups.items():
+            if cohort.lower() == 'all' or len(class_list) <= 1:
+                continue
+                
+            for i in range(len(class_list)):
+                for j in range(i + 1, len(class_list)):
+                    c1 = class_list[i]
+                    c2 = class_list[j]
+                    
+                    base_name1 = re.sub(r'_\d+$', '', c1.id)
+                    base_name2 = re.sub(r'_\d+$', '', c2.id)
+                    
+                    if base_name1 == base_name2:
+                        continue # Handled by _penalize_overlapping_sessions
+                        
+                    b_e1_le_s2 = self.model.NewBoolVar(f'c_overlap_e1_le_s2_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c1.id]['end'] <= self.class_vars[c2.id]['start']).OnlyEnforceIf(b_e1_le_s2)
+                    self.model.Add(self.class_vars[c1.id]['end'] >= self.class_vars[c2.id]['start'] + 1).OnlyEnforceIf(b_e1_le_s2.Not())
+                    
+                    b_e2_le_s1 = self.model.NewBoolVar(f'c_overlap_e2_le_s1_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c2.id]['end'] <= self.class_vars[c1.id]['start']).OnlyEnforceIf(b_e2_le_s1)
+                    self.model.Add(self.class_vars[c2.id]['end'] >= self.class_vars[c1.id]['start'] + 1).OnlyEnforceIf(b_e2_le_s1.Not())
+                    
+                    b_overlap = self.model.NewBoolVar(f'c_overlap_{c1.id}_{c2.id}')
+                    self.model.AddBoolAnd([b_e1_le_s2.Not(), b_e2_le_s1.Not()]).OnlyEnforceIf(b_overlap)
+                    self.model.AddBoolOr([b_e1_le_s2, b_e2_le_s1]).OnlyEnforceIf(b_overlap.Not())
+                    
+                    count1 = base_class_counts[base_name1]
+                    count2 = base_class_counts[base_name2]
+                    
+                    if count1 == 1 and count2 == 1:
+                        # Hard constraint: strictly prevent overlap
+                        self.model.Add(b_overlap == 0)
+                    else:
+                        # Soft constraint: minor penalty
+                        self.penalties.append(b_overlap * 20)
 
     def _penalize_teacher_class_monopoly(self):
         """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
@@ -676,6 +773,143 @@ class StudioSchedulerModel:
             print("Please fix these errors in classes.csv or teachers.yaml and try again.")
             sys.exit(1)
 
+    def seed_hints(self):
+        """Greedy pre-solver: builds an initial schedule hint for CP-SAT to accelerate convergence.
+        
+        Strategy:
+        1. Group classes by cohort, and within each cohort sort by number of valid teachers (most constrained first).
+        2. For each cohort, pack classes back-to-back on the same day when possible.
+        3. Assign the first valid teacher and room greedily.
+        4. Feed all assignments as solution hints to the CP-SAT model.
+        """
+        import re
+        from collections import defaultdict
+        
+        # Track occupancy: (day_idx, epoch) -> set of teacher_ids / room_ids
+        teacher_busy = defaultdict(set)  # epoch -> set of teacher_ids
+        room_busy = defaultdict(set)     # epoch -> set of room_ids
+        
+        # Group by cohort
+        cohort_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            cohort_groups[c.cohort].append(c)
+        
+        # Sort each cohort group: most constrained classes first (fewest valid teachers)
+        for cohort in cohort_groups:
+            cohort_groups[cohort].sort(key=lambda c: len(c.preferred_teachers) if c.preferred_teachers else len(self.teachers))
+        
+        # Interleave cohorts so we don't exhaust all slots for one cohort before touching others
+        # Process one class per cohort in round-robin
+        all_classes_ordered = []
+        remaining = dict(cohort_groups)
+        while remaining:
+            empty_cohorts = []
+            for cohort, clist in remaining.items():
+                if clist:
+                    all_classes_ordered.append(clist.pop(0))
+                if not clist:
+                    empty_cohorts.append(cohort)
+            for ec in empty_cohorts:
+                del remaining[ec]
+        
+        hints_applied = 0
+        
+        for c in all_classes_ordered:
+            if c.id not in self.class_vars: continue
+            c_vars = self.class_vars[c.id]
+            
+            # If pinned, use the pinned values directly
+            if c.pinned_time_epoch is not None:
+                best_start = c.pinned_time_epoch
+            else:
+                best_start = None
+                
+                # Try each day, looking for a slot that works
+                for d_idx, day_str in enumerate(self.cal.days):
+                    # Check allowed days
+                    if c.allowed_days and day_str not in c.allowed_days:
+                        continue
+                    
+                    day_base = d_idx * self.cal.day_offset
+                    
+                    # Determine search range within the day
+                    earliest = c.earliest_start_epoch if c.earliest_start_epoch is not None else 0
+                    latest_start = (c.latest_end_epoch - c.duration_epochs) if c.latest_end_epoch is not None else (self.day_duration_epochs - c.duration_epochs)
+                    
+                    for epoch_in_day in range(earliest, latest_start + 1):
+                        global_epoch = day_base + epoch_in_day
+                        
+                        # Check if all epochs for this class are free for at least one room and one teacher
+                        epochs_needed = range(global_epoch, global_epoch + c.duration_epochs)
+                        
+                        # Find a valid teacher
+                        valid_teachers = c.preferred_teachers if c.preferred_teachers else [t.id for t in self.teachers]
+                        if c.pinned_teacher:
+                            valid_teachers = [c.pinned_teacher]
+                        
+                        chosen_teacher = None
+                        for t_id in valid_teachers:
+                            t = self.teacher_by_id.get(t_id)
+                            if not t: continue
+                            
+                            # Check teacher availability on this day
+                            avail = getattr(t, 'availability', {})
+                            if avail and day_str not in avail:
+                                continue
+                            if avail and day_str in avail:
+                                times = avail[day_str]
+                                t_start = times.get('start')
+                                t_end = times.get('end')
+                                if t_start is not None and epoch_in_day < t_start:
+                                    continue
+                                if t_end is not None and (epoch_in_day + c.duration_epochs) > t_end:
+                                    continue
+                            
+                            if not any(t_id in teacher_busy[e] for e in epochs_needed):
+                                chosen_teacher = t_id
+                                break
+                        
+                        if not chosen_teacher:
+                            continue
+                        
+                        # Find a valid room
+                        chosen_room = None
+                        valid_rooms = [r for r in self.rooms if r.capacity >= c.size]
+                        if c.pinned_room:
+                            valid_rooms = [r for r in valid_rooms if r.id == c.pinned_room]
+                        
+                        for r in valid_rooms:
+                            if not any(r.id in room_busy[e] for e in epochs_needed):
+                                chosen_room = r.id
+                                break
+                        
+                        if not chosen_room:
+                            continue
+                        
+                        best_start = global_epoch
+                        # Mark occupancy
+                        for e in epochs_needed:
+                            teacher_busy[e].add(chosen_teacher)
+                            room_busy[e].add(chosen_room)
+                        
+                        # Apply hints
+                        self.model.AddHint(c_vars['start'], best_start)
+                        
+                        for t_id, p_var in c_vars['teacher_presences'].items():
+                            self.model.AddHint(p_var, 1 if t_id == chosen_teacher else 0)
+                        
+                        for r_id, p_var in c_vars['room_presences'].items():
+                            self.model.AddHint(p_var, 1 if r_id == chosen_room else 0)
+                        
+                        hints_applied += 1
+                        break  # Found a slot on this day, stop searching days
+                    
+                    if best_start is not None:
+                        break  # Stop searching days
+        
+        print(f"[Hint Seeder] Applied greedy hints for {hints_applied}/{len(all_classes_ordered)} classes.")
+
     def solve(self):
         self.validate_inputs()
         
@@ -747,4 +981,6 @@ def build_and_solve(classes: List[ClassSession], rooms: List[Room], teachers: Li
     scheduler.create_variables()
     scheduler.add_hard_constraints()
     scheduler.add_soft_constraints()
+    scheduler.seed_hints()
     return scheduler.solve()
+
