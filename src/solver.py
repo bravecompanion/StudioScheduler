@@ -288,16 +288,30 @@ class StudioSchedulerModel:
             self.model.Add(sum(katie_6_8_jazz) <= 1)
 
     def add_soft_constraints(self):
-        #self._penalize_late_young_classes()
-        self._penalize_session_clustering()
-        self._penalize_session_time_clustering()
-        self._penalize_teacher_schedule_span()
-        self._penalize_teacher_days_requested()
-        self._reward_cohort_bunching()
-        self._penalize_overlapping_sessions()
-        self._manage_cohort_overlaps()
-        self._penalize_teacher_class_monopoly()
-        self._reward_teacher_diversity()
+        # Session Spreading
+        self._penalize_session_clustering(weight=100)
+        self._penalize_session_time_clustering(weight=100)
+        self._penalize_overlapping_sessions(weight=500)
+        
+        # Teacher Schedules
+        self._penalize_teacher_schedule_span(weight_gap=5)
+        self._penalize_teacher_days_requested(weight=10000)
+        self._penalize_teacher_class_monopoly(weight=500, threshold_sessions=2)
+        self._reward_teacher_diversity(weight=80)
+        
+        # Cohorts
+        self._manage_cohort_overlaps(weight_overlap=200)
+        self._reward_cohort_bunching(
+            weight_t1=-120,
+            weight_t2=-90,
+            weight_t1_jazz_ballet=-240,
+            weight_t2_jazz_ballet=-180
+        )
+        # self._penalize_cohort_distance(
+        #     weight_same_class=0,
+        #     weight_diff_class=3,
+        #     weight_singleton=1
+        # )
         
         if self.penalties:
             self.model.Minimize(sum(self.penalties))
@@ -323,9 +337,8 @@ class StudioSchedulerModel:
                 
                 self.penalties.append(late_epochs * weight)
 
-    def _penalize_session_clustering(self):
+    def _penalize_session_clustering(self, weight):
         """Soft Constraint: Diversify the days on which multiple sessions of the same class are offered."""
-        PENALTY_MULT = 100
 
         # Group classes by base name
         base_class_groups = defaultdict(list)
@@ -366,12 +379,10 @@ class StudioSchedulerModel:
                 self.model.AddMultiplicationEquality(count_sq, [count_on_day, count_on_day])
                 
                 # Multiply by a solid weight to heavily prioritize spreading them out
-                self.penalties.append(count_sq * PENALTY_MULT)
+                self.penalties.append(count_sq * weight)
 
-    def _penalize_overlapping_sessions(self):
+    def _penalize_overlapping_sessions(self, weight):
         """Soft Constraint: Penalize scheduling 2 sessions of the same class at overlapping times."""
-
-        PENALTY_MULT = 500
 
         # Group classes by base name
         base_class_groups = defaultdict(list)
@@ -403,14 +414,12 @@ class StudioSchedulerModel:
                     self.model.AddBoolOr([b_e1_le_s2, b_e2_le_s1]).OnlyEnforceIf(b_overlap.Not())
                     
                     # High penalty to strongly discourage it
-                    self.penalties.append(b_overlap * PENALTY_MULT)
+                    self.penalties.append(b_overlap * weight)
 
-    def _manage_cohort_overlaps(self):
+    def _manage_cohort_overlaps(self, weight_overlap):
         """Hard/Soft Constraint: Prevent or penalize overlaps between different classes in the same cohort."""
         import re
         from collections import defaultdict
-
-        PENALTY_MULT = 200
         
         # Group classes by cohort
         cohort_groups = defaultdict(list)
@@ -460,15 +469,12 @@ class StudioSchedulerModel:
                         self.model.Add(b_overlap == 0)
                     else:
                         # Soft constraint: minor penalty
-                        self.penalties.append(b_overlap * PENALTY_MULT)
+                        self.penalties.append(b_overlap * weight_overlap)
 
-    def _penalize_teacher_class_monopoly(self):
+    def _penalize_teacher_class_monopoly(self, weight, threshold_sessions):
         """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
         import re
         from collections import defaultdict
-
-        CLASS_CUTOFF = 2
-        PENALTY_MULT = 500
         
         base_class_groups = defaultdict(list)
         for c in self.classes:
@@ -486,17 +492,17 @@ class StudioSchedulerModel:
                     if t.id in self.class_vars[c.id]['teacher_presences']:
                         t_presences.append(self.class_vars[c.id]['teacher_presences'][t.id])
                 
-                if len(t_presences) > CLASS_CUTOFF:
+                if len(t_presences) > threshold_sessions:
                     total_sessions = sum(t_presences)
                     
                     excess = self.model.NewIntVar(0, len(t_presences), f'excess_monopoly_{t.id}_{base_name}')
-                    # excess = max(0, total_sessions - 2)
-                    self.model.AddMaxEquality(excess, [0, total_sessions - 2])
+                    # excess = max(0, total_sessions - threshold_sessions)
+                    self.model.AddMaxEquality(excess, [0, total_sessions - threshold_sessions])
                     
-                    # High penalty per excess class over 2
-                    self.penalties.append(excess * PENALTY_MULT)
+                    # High penalty per excess class
+                    self.penalties.append(excess * weight)
 
-    def _reward_teacher_diversity(self):
+    def _reward_teacher_diversity(self, weight):
         """Soft Constraint: Encourage using different teachers for sessions of the same class.
         
         For each pair of sessions of the same base class, applies a penalty if they
@@ -505,8 +511,6 @@ class StudioSchedulerModel:
         """
         import re
         from collections import defaultdict
-        
-        PENALTY_MULT = 80
         
         base_class_groups = defaultdict(list)
         for c in self.classes:
@@ -536,11 +540,10 @@ class StudioSchedulerModel:
                         self.model.AddBoolAnd([p1, p2]).OnlyEnforceIf(both_same)
                         self.model.AddBoolOr([p1.Not(), p2.Not()]).OnlyEnforceIf(both_same.Not())
                         
-                        self.penalties.append(both_same * PENALTY_MULT)
+                        self.penalties.append(both_same * weight)
 
-    def _penalize_session_time_clustering(self):
+    def _penalize_session_time_clustering(self, weight):
         """Soft Constraint: Diversify the time-of-day that sessions of the same class are offered."""
-        PENALTY_MULT = 100
 
         import re
         class_groups = {}
@@ -574,11 +577,10 @@ class StudioSchedulerModel:
                 count_sq = self.model.NewIntVar(0, len(class_list) ** 2, f'time_count_sq_{base_name}_{e_idx}')
                 self.model.AddMultiplicationEquality(count_sq, [count, count])
                 
-                self.penalties.append(count_sq * PENALTY_MULT)
+                self.penalties.append(count_sq * weight)
 
-    def _penalize_teacher_schedule_span(self):
+    def _penalize_teacher_schedule_span(self, weight_gap):
         """Soft Constraint: Penalize idle/gap time in a teacher's daily schedule (span minus teaching time)."""
-        PENALTY_MULT=5
         for t in self.teachers:
             if not self.teacher_intervals[t.id]: continue
                 
@@ -643,9 +645,9 @@ class StudioSchedulerModel:
                 gap_time = self.model.NewIntVar(0, self.day_duration_epochs, f'gap_{t.id}_{d_idx}')
                 self.model.AddMaxEquality(gap_time, [0, span - total_teaching])
                 
-                self.penalties.append(gap_time * PENALTY_MULT)
+                self.penalties.append(gap_time * weight_gap)
 
-    def _penalize_teacher_days_requested(self):
+    def _penalize_teacher_days_requested(self, weight):
         """Soft Constraint: Penalize if a teacher is active on more or fewer days than they requested."""
         for t in self.teachers:
             if not getattr(t, 'days_requested', None): continue
@@ -689,9 +691,9 @@ class StudioSchedulerModel:
             abs_diff = self.model.NewIntVar(0, len(self.cal.days), f'abs_diff_{t.id}')
             self.model.AddMaxEquality(abs_diff, [diff1, diff2])
             
-            self.penalties.append(abs_diff * 10000)
+            self.penalties.append(abs_diff * weight)
 
-    def _reward_cohort_bunching(self):
+    def _reward_cohort_bunching(self, weight_t1, weight_t2, weight_t1_jazz_ballet, weight_t2_jazz_ballet):
         """Soft Constraint: Reward sequencing classes of the same cohort but different styles with small/no gaps."""
         cohort_groups = {}
         for c in self.classes:
@@ -733,13 +735,13 @@ class StudioSchedulerModel:
                     self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] <= 6).OnlyEnforceIf(close_2_to_1)
                     
                     # Determine reward values
-                    t1_reward = -120
-                    t2_reward = -90
+                    t1_reward = weight_t1
+                    t2_reward = weight_t2
                     
                     # Special bonus for bunching jazz and ballet
                     if {c1.style.lower(), c2.style.lower()} == {'jazz', 'ballet'}:
-                        t1_reward = -240
-                        t2_reward = -180
+                        t1_reward = weight_t1_jazz_ballet
+                        t2_reward = weight_t2_jazz_ballet
                     
                     # Add negative penalties (rewards)
                     self.penalties.append(b2b_1_to_2 * t1_reward)
@@ -747,21 +749,16 @@ class StudioSchedulerModel:
                     self.penalties.append(close_1_to_2 * t2_reward)
                     self.penalties.append(close_2_to_1 * t2_reward)
 
-    def _penalize_cohort_distance(self):
-        """Soft Constraint: Penalize distance between same-cohort classes on the same day.
+    def _penalize_cohort_distance(self, weight_same_class, weight_diff_class, weight_singleton):
+        """Soft Constraint: Penalize distance between same-cohort classes.
         
-        Provides a continuous signal that pulls cohort classes closer together,
-        complementing the tiered reward which only fires within a narrow window.
-        Only applies to classes on the same day to avoid biasing day assignment.
-        Stronger weight for different classes (different base name) to encourage
-        schedule compactness for the cohort.
+        If both classes are singletons (only 1 session), it penalizes their global distance 
+        across days to pull them onto the same day, and then pulls them closer.
+        If either class has multiple sessions, it only penalizes their distance if they 
+        happen to be on the same day, avoiding biasing day assignment.
         """
         import re
         from collections import defaultdict
-        
-        SAME_CLASS_MULT = 0    # Light signal for sessions of the same class
-        DIFF_CLASS_MULT = 3    # Stronger signal for different classes in the cohort
-        SINGLETON_MULT = 1     # Global signal for singletons to pull them to the same day
         
         # Pre-calculate session counts per base class to identify singletons
         base_class_counts = defaultdict(int)
@@ -803,7 +800,7 @@ class StudioSchedulerModel:
                     # If BOTH are singletons of DIFFERENT classes
                     if base1 != base2 and base_class_counts[base1] == 1 and base_class_counts[base2] == 1:
                         # Apply global distance penalty: pulls them onto the same day, then pulls them close
-                        self.penalties.append(abs_diff * SINGLETON_MULT)
+                        self.penalties.append(abs_diff * weight_singleton)
                     else:
                         # MULTIPLE sessions. Only penalize if on the same day.
                         day1 = self.model.NewIntVar(0, len(self.cal.days) - 1, f'cdist_day1_{c1.id}_{c2.id}')
@@ -819,7 +816,7 @@ class StudioSchedulerModel:
                         self.model.Add(penalized_dist == abs_diff).OnlyEnforceIf(same_day)
                         self.model.Add(penalized_dist == 0).OnlyEnforceIf(same_day.Not())
                         
-                        weight = DIFF_CLASS_MULT if base1 != base2 else SAME_CLASS_MULT
+                        weight = weight_diff_class if base1 != base2 else weight_same_class
                         self.penalties.append(penalized_dist * weight)
 
     def validate_inputs(self):
