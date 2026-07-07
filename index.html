@@ -63,6 +63,15 @@
     .pinned-time-event {
       border-width: 3px !important;
     }
+    
+    .selected-event {
+      box-shadow: 0 0 0 2px #0d6efd !important;
+      z-index: 10 !important;
+    }
+    
+    .dimmed-event {
+      opacity: 0.7 !important;
+    }
 
     /* Soften the header font */
     .fc-col-header-cell-cushion {
@@ -112,8 +121,9 @@
       const data = await response.json();
 
       const calendarEl = document.getElementById('calendar');
-      let currentDimension = 'rooms';
-      let currentColorDimension = 'cohort';
+      let currentDimension = 'rooms'; // 'rooms' or 'teachers'
+      let currentColorDimension = 'cohort'; // 'cohort' or 'style'
+      let selectedClassId = null;
       
       const predefinedColors = [
           'hsl(0, 45%, 70%)',   // Soft Red
@@ -167,9 +177,44 @@
       window.visibleBaseClasses = new Set(baseClasses);
 
       function getMappedEvents(dimension, colorDimension) {
+        let selectedTeacherId = null;
+        let selectedDateStr = null;
+        if (selectedClassId) {
+            const selectedEvent = data.events.find(e => e.id === selectedClassId);
+            if (selectedEvent) {
+                selectedTeacherId = selectedEvent.extendedProps.teacher_id;
+                selectedDateStr = selectedEvent.start.split('T')[0];
+            }
+        }
+
         return data.events
-          .filter(event => window.visibleBaseClasses.has(getBaseClass(event.id)))
+          .filter(event => {
+              if (event.extendedProps.is_availability) {
+                  if (dimension === 'teachers') return true;
+                  if (selectedTeacherId && event.extendedProps.teacher_id === selectedTeacherId && event.start.startsWith(selectedDateStr)) return true;
+                  return false;
+              }
+              return window.visibleBaseClasses.has(getBaseClass(event.id));
+          })
           .map(event => {
+          if (event.extendedProps.is_availability) {
+              let resourceIds = undefined;
+              let resourceId = event.extendedProps.teacher_id;
+              
+              if (dimension === 'rooms') {
+                  resourceIds = data.resources_rooms.map(r => r.id);
+                  resourceId = undefined;
+              }
+              
+              return {
+                  ...event,
+                  display: 'background',
+                  backgroundColor: 'rgba(163, 184, 255, 0.45)',
+                  resourceId: resourceId,
+                  resourceIds: resourceIds
+              };
+          }
+
           const color = getColorForEvent(event, colorDimension);
           
           const classNames = [];
@@ -177,11 +222,24 @@
               classNames.push('pinned-time-event');
           }
           
+          let isSelectedGroup = false;
+          if (selectedClassId && dimension === 'rooms') {
+              if (event.extendedProps.teacher_id === selectedTeacherId && event.start.startsWith(selectedDateStr)) {
+                  isSelectedGroup = true;
+              }
+          }
+          
+          if (isSelectedGroup) {
+              classNames.push('selected-event');
+          } else if (selectedClassId && dimension === 'rooms') {
+              classNames.push('dimmed-event');
+          }
+          
           return {
             ...event,
             resourceId: dimension === 'rooms' ? event.extendedProps.room_id : event.extendedProps.teacher_id,
             backgroundColor: color,
-            borderColor: 'black',
+            borderColor: isSelectedGroup ? 'black' : 'rgba(0,0,0,0.4)',
             textColor: 'black',
             classNames: classNames
           };
@@ -202,6 +260,9 @@
         
         eventContent: function(arg) {
           const props = arg.event.extendedProps;
+          if (props.is_availability) {
+              return { html: '' };
+          }
           const startStr = arg.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
           const endStr = arg.event.end ? arg.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
           const className = arg.event.id;
@@ -222,8 +283,24 @@
           };
         },
         
+        eventClick: function(info) {
+          if (currentDimension === 'teachers') return; // Selection disabled in Teachers view
+          
+          const props = info.event.extendedProps;
+          if (props.is_availability) return;
+          
+          const clickedId = info.event.id;
+          if (selectedClassId === clickedId) {
+              selectedClassId = null;
+          } else {
+              selectedClassId = clickedId;
+          }
+          updateCalendar();
+        },
+        
         eventMouseEnter: function(info) {
           const props = info.event.extendedProps;
+          if (props.is_availability) return;
           const className = info.event.id;
           info.el.title = `Class: ${className}\nCohort: ${props.cohort}\nStyle: ${props.style}\nRoom: ${props.room_id.replace('room_', '')}\nTeacher: ${props.teacher_id.replace('teacher_', '')}`;
         }
@@ -242,6 +319,7 @@
 
       document.getElementById('viewToggle').addEventListener('change', function(e) {
         currentDimension = e.target.value;
+        selectedClassId = null; // Clear selection when view changes
         updateCalendar();
       });
       

@@ -37,7 +37,7 @@ def main():
         export_to_ical(results)
         
         # Generate JSON file for frontend display
-        export_to_json(results)
+        export_to_json(results, cal=cal, all_teachers=teachers)
     else:
         print("No schedule could be generated.")
 

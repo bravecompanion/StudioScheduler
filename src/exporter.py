@@ -102,7 +102,7 @@ def export_to_ical(results, output_dir="calendars"):
             
     print(f"Generated {len(teacher_events)} teacher calendars, {len(room_events)} room calendars, and {len(cohort_events)} cohort calendars in the '{output_dir}/' directory.")
 
-def export_to_json(results, json_path="schedule.json"):
+def export_to_json(results, json_path="schedule.json", cal=None, all_teachers=None):
     # Map days to a concrete "dummy" week so FullCalendar can plot them
     day_map = {
         'MON': '2026-07-06', 'TUE': '2026-07-07', 'WED': '2026-07-08',
@@ -145,6 +145,39 @@ def export_to_json(results, json_path="schedule.json"):
                 "is_pinned_time": r.get('Is_Pinned_Time', False)
             }
         })
+
+    if cal and all_teachers:
+        open_h, open_m = map(int, cal.open_time.split(':'))
+        open_mins = open_h * 60 + open_m
+        for t in all_teachers:
+            if not t.availability: continue
+            for day, avail in t.availability.items():
+                if not avail: continue
+                date_str = day_map.get(day.upper())
+                if not date_str: continue
+                
+                start_epoch = avail.get('start')
+                end_epoch = avail.get('end')
+                
+                if start_epoch is None or end_epoch is None: continue
+                
+                s_mins = open_mins + start_epoch * cal.epoch_minutes
+                e_mins = open_mins + end_epoch * cal.epoch_minutes
+                
+                s_h, s_m = s_mins // 60, s_mins % 60
+                e_h, e_m = e_mins // 60, e_mins % 60
+                
+                events.append({
+                    "id": f"avail_{t.id}_{day}",
+                    "title": "",
+                    "start": f"{date_str}T{s_h:02d}:{s_m:02d}:00",
+                    "end": f"{date_str}T{e_h:02d}:{e_m:02d}:00",
+                    "extendedProps": {
+                        "is_availability": True,
+                        "teacher_id": f"teacher_{t.id}",
+                        "room_id": "none"
+                    }
+                })
 
     resources_rooms = [{"id": f"room_{rm}", "title": f"Room {rm}"} for rm in sorted(rooms)]
     resources_teachers = [{"id": f"teacher_{t}", "title": t} for t in sorted(teachers)]
