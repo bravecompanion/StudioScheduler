@@ -136,6 +136,7 @@ class StudioSchedulerModel:
         # Spreading and overlaps
         self._enforce_no_overlaps()
         self._enforce_class_session_spreading()
+        self._enforce_cohort_no_overlaps(max_sessions=4)
 
     def _enforce_room_assignments(self):
         for c in self.classes:
@@ -385,7 +386,7 @@ class StudioSchedulerModel:
         self._reward_teacher_diversity(weight=80)
         
         # Cohorts
-        self._manage_cohort_overlaps(weight_overlap=200)
+        self._penalize_cohort_overlaps(weight_overlap=200)
         self._reward_cohort_bunching(
             weight_t1=-120,
             weight_t2=-90,
@@ -501,10 +502,12 @@ class StudioSchedulerModel:
                     # High penalty to strongly discourage it
                     self.penalties.append(b_overlap * weight)
 
-    def _manage_cohort_overlaps(self, weight_overlap):
-        """Hard/Soft Constraint: Prevent or penalize overlaps between different classes in the same cohort."""
+    def _enforce_cohort_no_overlaps(self, max_sessions):
+        """Hard Constraint: Prevent overlaps between different classes in the same cohort if they have <= max_sessions."""
         import re
         from collections import defaultdict
+        
+        self.cohort_overlap_vars = {}
         
         # Group classes by cohort
         cohort_groups = defaultdict(list)
@@ -549,12 +552,18 @@ class StudioSchedulerModel:
                     count1 = base_class_counts[base_name1]
                     count2 = base_class_counts[base_name2]
                     
-                    if count1 == 1 and count2 == 1:
-                        # Hard constraint: strictly prevent overlap
+                    if count1 <= max_sessions and count2 <= max_sessions:
+                        # Hard constraint: strictly prevent overlap if both classes have <= max_sessions
                         self.model.Add(b_overlap == 0)
                     else:
-                        # Soft constraint: minor penalty
-                        self.penalties.append(b_overlap * weight_overlap)
+                        # Cache the overlap variable for the soft constraint to penalize
+                        self.cohort_overlap_vars[(c1.id, c2.id)] = b_overlap
+
+    def _penalize_cohort_overlaps(self, weight_overlap):
+        """Soft Constraint: Penalize overlaps between different classes in the same cohort (for those not hard-constrained)."""
+        if not hasattr(self, 'cohort_overlap_vars'): return
+        for (c1_id, c2_id), b_overlap in self.cohort_overlap_vars.items():
+            self.penalties.append(b_overlap * weight_overlap)
 
     def _penalize_teacher_class_monopoly(self, weight, threshold_sessions):
         """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
