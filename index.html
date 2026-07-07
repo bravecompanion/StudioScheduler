@@ -252,41 +252,125 @@
 
       // Filter Logic
       const classCounts = {};
+      const classCohorts = {};
       data.events.forEach(e => {
           const bc = getBaseClass(e.id);
           classCounts[bc] = (classCounts[bc] || 0) + 1;
+          classCohorts[bc] = e.extendedProps.cohort || 'Unknown';
+      });
+
+      const cohorts = {};
+      baseClasses.forEach(bc => {
+          const cohort = classCohorts[bc];
+          if (!cohorts[cohort]) cohorts[cohort] = [];
+          cohorts[cohort].push(bc);
       });
 
       const checkboxContainer = document.getElementById('checkboxContainer');
-      baseClasses.forEach(bc => {
-          const div = document.createElement('div');
-          div.className = 'form-check';
-          div.innerHTML = `
-              <input class="form-check-input class-filter-cb" type="checkbox" value="${bc}" id="cb_${bc}" checked>
-              <label class="form-check-label" for="cb_${bc}">${bc} (${classCounts[bc]})</label>
+      const ungroupedClasses = [];
+
+      Object.keys(cohorts).sort().forEach(cohort => {
+          if (cohort.toLowerCase() === 'all' || cohorts[cohort].length < 2) {
+              ungroupedClasses.push(...cohorts[cohort]);
+              return;
+          }
+
+          const cohortDiv = document.createElement('div');
+          cohortDiv.className = 'mb-3 border rounded p-2';
+          
+          const safeCohortId = cohort.replace(/[^a-zA-Z0-9]/g, '_');
+          
+          const header = document.createElement('div');
+          header.className = 'form-check fw-bold mb-2 border-bottom pb-1';
+          header.innerHTML = `
+              <input class="form-check-input cohort-filter-cb" type="checkbox" value="${cohort}" id="cb_cohort_${safeCohortId}" checked>
+              <label class="form-check-label" for="cb_cohort_${safeCohortId}">${cohort}</label>
           `;
-          checkboxContainer.appendChild(div);
+          cohortDiv.appendChild(header);
+
+          const classListDiv = document.createElement('div');
+          classListDiv.className = 'ms-3';
+          
+          cohorts[cohort].forEach(bc => {
+              const div = document.createElement('div');
+              div.className = 'form-check';
+              div.innerHTML = `
+                  <input class="form-check-input class-filter-cb" data-cohort="${cohort}" data-cohort-id="${safeCohortId}" type="checkbox" value="${bc}" id="cb_${bc}" checked>
+                  <label class="form-check-label" for="cb_${bc}">${bc} (${classCounts[bc]})</label>
+              `;
+              classListDiv.appendChild(div);
+          });
+          
+          cohortDiv.appendChild(classListDiv);
+          checkboxContainer.appendChild(cohortDiv);
       });
+
+      if (ungroupedClasses.length > 0) {
+          const ungroupedDiv = document.createElement('div');
+          ungroupedDiv.className = 'mb-3 p-2';
+          
+          ungroupedClasses.sort().forEach(bc => {
+              const div = document.createElement('div');
+              div.className = 'form-check';
+              div.innerHTML = `
+                  <input class="form-check-input class-filter-cb" data-cohort="ungrouped" data-cohort-id="ungrouped" type="checkbox" value="${bc}" id="cb_${bc}" checked>
+                  <label class="form-check-label" for="cb_${bc}">${bc} (${classCounts[bc]})</label>
+              `;
+              ungroupedDiv.appendChild(div);
+          });
+          checkboxContainer.appendChild(ungroupedDiv);
+      }
       
       checkboxContainer.addEventListener('change', function(e) {
-          if (e.target.classList.contains('class-filter-cb')) {
+          if (e.target.classList.contains('cohort-filter-cb')) {
+              const cohort = e.target.value;
+              const isChecked = e.target.checked;
+              
+              // Find all class checkboxes for this cohort and update them
+              document.querySelectorAll(`.class-filter-cb[data-cohort="${cohort}"]`).forEach(cb => {
+                  cb.checked = isChecked;
+                  if (isChecked) {
+                      window.visibleBaseClasses.add(cb.value);
+                  } else {
+                      window.visibleBaseClasses.delete(cb.value);
+                  }
+              });
+              updateCalendar();
+          } else if (e.target.classList.contains('class-filter-cb')) {
               if (e.target.checked) {
                   window.visibleBaseClasses.add(e.target.value);
               } else {
                   window.visibleBaseClasses.delete(e.target.value);
               }
+              
+              const safeCohortId = e.target.getAttribute('data-cohort-id');
+              const cohortCb = document.getElementById(`cb_cohort_${safeCohortId}`);
+              if (cohortCb) {
+                  const allClassCbs = Array.from(document.querySelectorAll(`.class-filter-cb[data-cohort-id="${safeCohortId}"]`));
+                  const allChecked = allClassCbs.every(cb => cb.checked);
+                  const someChecked = allClassCbs.some(cb => cb.checked);
+                  cohortCb.checked = allChecked;
+                  cohortCb.indeterminate = someChecked && !allChecked;
+              }
+              
               updateCalendar();
           }
       });
       
       document.getElementById('selectAllBtn').addEventListener('click', () => {
-          document.querySelectorAll('.class-filter-cb').forEach(cb => cb.checked = true);
+          document.querySelectorAll('.class-filter-cb, .cohort-filter-cb').forEach(cb => {
+              cb.checked = true;
+              cb.indeterminate = false;
+          });
           baseClasses.forEach(bc => window.visibleBaseClasses.add(bc));
           updateCalendar();
       });
       
       document.getElementById('deselectAllBtn').addEventListener('click', () => {
-          document.querySelectorAll('.class-filter-cb').forEach(cb => cb.checked = false);
+          document.querySelectorAll('.class-filter-cb, .cohort-filter-cb').forEach(cb => {
+              cb.checked = false;
+              cb.indeterminate = false;
+          });
           window.visibleBaseClasses.clear();
           updateCalendar();
       });
