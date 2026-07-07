@@ -120,13 +120,27 @@ class StudioSchedulerModel:
             }
 
     def add_hard_constraints(self):
-        # Enforce exactly one room/teacher and pinning
+        # Resource pinning and assignments
+        self._enforce_room_assignments()
+        self._enforce_teacher_assignments()
+        self._enforce_pinned_times()
+        
+        # Scheduling windows and availability
+        self._enforce_class_time_windows()
+        self._enforce_teacher_availability()
+        
+        # Teacher limitations
+        self._enforce_teacher_hates()
+        self._enforce_teacher_minimum_hours(min_hours=1)
+        
+        # Spreading and overlaps
+        self._enforce_no_overlaps()
+        self._enforce_class_session_spreading()
+
+    def _enforce_room_assignments(self):
         for c in self.classes:
             if c.id not in self.class_vars: continue
-            c_vars = self.class_vars[c.id]
-            
-            # Room pinning and exactly one
-            room_presences = c_vars['room_presences']
+            room_presences = self.class_vars[c.id]['room_presences']
             if room_presences:
                 self.model.AddExactlyOne(list(room_presences.values()))
                 if c.pinned_room:
@@ -134,9 +148,11 @@ class StudioSchedulerModel:
                         self.model.Add(room_presences[c.pinned_room] == 1)
                     else:
                         print(f"CRITICAL ERROR: Class '{c.id}' is pinned to Room '{c.pinned_room}' but it's excluded (likely size).")
-            
-            # Teacher pinning and exactly one
-            teacher_presences = c_vars['teacher_presences']
+
+    def _enforce_teacher_assignments(self):
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            teacher_presences = self.class_vars[c.id]['teacher_presences']
             if teacher_presences:
                 self.model.AddExactlyOne(list(teacher_presences.values()))
                 if c.pinned_teacher:
@@ -144,28 +160,24 @@ class StudioSchedulerModel:
                         self.model.Add(teacher_presences[c.pinned_teacher] == 1)
                     else:
                         print(f"CRITICAL ERROR: Class '{c.id}' is pinned to Teacher '{c.pinned_teacher}' but they were excluded.")
-            
-            # Teacher Hate Preferences (hard constraint)
-            for t_id, presence in teacher_presences.items():
-                t = self.teacher_by_id.get(t_id)
-                if not t: continue
-                
-                if c.style.lower() in t.hate_classes or c.cohort in t.hate_cohorts:
-                    self.model.Add(presence == 0)
-                        
-            # Time pinning
+
+    def _enforce_pinned_times(self):
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
             if c.pinned_time_epoch is not None:
-                self.model.Add(c_vars['start'] == c.pinned_time_epoch)
-                
-            # Teacher Availability (Day of Week and Time)
-            start_var = c_vars['start']
+                self.model.Add(self.class_vars[c.id]['start'] == c.pinned_time_epoch)
+
+    def _enforce_class_time_windows(self):
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            start_var = self.class_vars[c.id]['start']
+            
             epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'epoch_in_day_hard_{c.id}')
             self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
             
             day_idx_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_hard_{c.id}')
             self.model.AddDivisionEquality(day_idx_var, start_var, self.cal.day_offset)
             
-            # Class Time Window Constraints
             if c.allowed_days:
                 valid_day_indices = [i for i, d in enumerate(self.cal.days) if d in c.allowed_days]
                 invalid_day_indices = [i for i in range(len(self.cal.days)) if i not in valid_day_indices]
@@ -177,6 +189,18 @@ class StudioSchedulerModel:
                 
             if c.latest_end_epoch is not None:
                 self.model.Add(epoch_in_day + c.duration_epochs <= c.latest_end_epoch)
+
+    def _enforce_teacher_availability(self):
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            start_var = self.class_vars[c.id]['start']
+            teacher_presences = self.class_vars[c.id]['teacher_presences']
+            
+            epoch_in_day = self.model.NewIntVar(0, self.cal.day_offset - 1, f'epoch_in_day_ta_{c.id}')
+            self.model.AddModuloEquality(epoch_in_day, start_var, self.cal.day_offset)
+            
+            day_idx_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'day_idx_ta_{c.id}')
+            self.model.AddDivisionEquality(day_idx_var, start_var, self.cal.day_offset)
             
             for t_id, presence in teacher_presences.items():
                 t = self.teacher_by_id[t_id]
@@ -191,10 +215,8 @@ class StudioSchedulerModel:
                         self.model.Add(day_idx_var == inv_idx).OnlyEnforceIf(is_invalid_day)
                         self.model.Add(day_idx_var != inv_idx).OnlyEnforceIf(is_invalid_day.Not())
                         
-                        # If the class falls on an invalid day, the teacher cannot be assigned to it.
                         self.model.AddImplication(is_invalid_day, presence.Not())
                         
-                    # Time of Day Availability per valid day
                     for d_idx, day_str in enumerate(self.cal.days):
                         if day_str not in valid_days:
                             continue
@@ -212,18 +234,28 @@ class StudioSchedulerModel:
                                 self.model.Add(epoch_in_day >= start_epoch).OnlyEnforceIf([presence, is_on_day])
                             if end_epoch is not None:
                                 self.model.Add(epoch_in_day + c.duration_epochs <= end_epoch).OnlyEnforceIf([presence, is_on_day])
-                
-        # NoOverlap for Rooms
+
+    def _enforce_teacher_hates(self):
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            teacher_presences = self.class_vars[c.id]['teacher_presences']
+            for t_id, presence in teacher_presences.items():
+                t = self.teacher_by_id.get(t_id)
+                if not t: continue
+                if c.style.lower() in t.hate_classes or c.cohort in t.hate_cohorts:
+                    self.model.Add(presence == 0)
+
+    def _enforce_no_overlaps(self):
         for r_id, intervals in self.room_intervals.items():
             if intervals:
                 self.model.AddNoOverlap(intervals)
                 
-        # NoOverlap for Teachers
         for t_id, intervals in self.teacher_intervals.items():
             if intervals:
                 self.model.AddNoOverlap(intervals)
-                
-        # Ensure teachers have > 1 hour every day they teach
+
+    def _enforce_teacher_minimum_hours(self, min_hours):
+        min_epochs = min_hours * (60 // self.cal.epoch_minutes)
         for t in self.teachers:
             for d_idx, day_str in enumerate(self.cal.days):
                 class_durations_on_day = []
@@ -261,8 +293,61 @@ class StudioSchedulerModel:
                 self.model.Add(total_dur > 0).OnlyEnforceIf(is_working)
                 self.model.Add(total_dur == 0).OnlyEnforceIf(is_working.Not())
                 
-                # Enforce > 12 epochs (> 60 minutes)
-                self.model.Add(total_dur > 12).OnlyEnforceIf(is_working)
+                self.model.Add(total_dur > min_epochs).OnlyEnforceIf(is_working)
+
+    def _enforce_class_session_spreading(self):
+        """
+        Makes sessions of a class spread out on the schedule.
+
+        1-4 sessions: must be on different days
+        5-7 sessions: at least 1 per day
+        8+ sessions: at least 2 per day
+        """
+        import re
+        from collections import defaultdict
+        base_class_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars: continue
+            base_name = re.sub(r'_\d+$', '', c.id)
+            base_class_groups[base_name].append(c)
+            
+        for base_name, class_list in base_class_groups.items():
+            if 1 < len(class_list) <= 4:
+                day_vars = []
+                for c in class_list:
+                    start_var = self.class_vars[c.id]['start']
+                    day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'spread_day_idx_{c.id}')
+                    self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                    day_vars.append(day_var)
+                self.model.AddAllDifferent(day_vars)
+            elif len(class_list) > 4 and len(class_list) <= 7:
+                for d_idx in range(len(self.cal.days)):
+                    sessions_on_this_day = []
+                    for c in class_list:
+                        start_var = self.class_vars[c.id]['start']
+                        day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'req_day_idx_{c.id}_{d_idx}')
+                        self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                        
+                        is_on_day = self.model.NewBoolVar(f'is_on_day_{d_idx}_{c.id}')
+                        self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                        self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                        sessions_on_this_day.append(is_on_day)
+                        
+                    self.model.Add(sum(sessions_on_this_day) >= 1)
+            elif len(class_list) > 8:
+                for d_idx in range(len(self.cal.days)):
+                    sessions_on_this_day = []
+                    for c in class_list:
+                        start_var = self.class_vars[c.id]['start']
+                        day_var = self.model.NewIntVar(0, len(self.cal.days) - 1, f'req_day_idx_{c.id}_{d_idx}')
+                        self.model.AddDivisionEquality(day_var, start_var, self.cal.day_offset)
+                        
+                        is_on_day = self.model.NewBoolVar(f'is_on_day_{d_idx}_{c.id}')
+                        self.model.Add(day_var == d_idx).OnlyEnforceIf(is_on_day)
+                        self.model.Add(day_var != d_idx).OnlyEnforceIf(is_on_day.Not())
+                        sessions_on_this_day.append(is_on_day)
+                        
+                    self.model.Add(sum(sessions_on_this_day) >= 2)
                 
         self._add_one_off_custom_constraints()
 
