@@ -137,6 +137,10 @@ class StudioSchedulerModel:
         self._enforce_no_overlaps()
         self._enforce_class_session_spreading()
         self._enforce_cohort_no_overlaps(max_sessions=4)
+        self._enforce_cohort_adjacency(
+            max_gap=0, 
+            applicable_cohorts=["6-8", "9-12", "12+"]
+        )
 
     def _enforce_room_assignments(self):
         for c in self.classes:
@@ -564,6 +568,48 @@ class StudioSchedulerModel:
         if not hasattr(self, 'cohort_overlap_vars'): return
         for (c1_id, c2_id), b_overlap in self.cohort_overlap_vars.items():
             self.penalties.append(b_overlap * weight_overlap)
+
+    def _enforce_cohort_adjacency(self, max_gap, applicable_cohorts):
+        """Hard Constraint: Every class session of a cohort must be adjacent to at least one other class session of the same cohort."""
+        import re
+        from collections import defaultdict
+        
+        cohort_groups = defaultdict(list)
+        for c in self.classes:
+            if c.id not in self.class_vars or not c.cohort: continue
+            if applicable_cohorts is not None and c.cohort not in applicable_cohorts: continue
+            cohort_groups[c.cohort].append(c)
+            
+        for cohort, class_list in cohort_groups.items():
+            if cohort.lower() == 'all' or len(class_list) <= 1:
+                continue
+                
+            for c1 in class_list:
+                base_name1 = re.sub(r'_\d+$', '', c1.id)
+                
+                adjacent_vars = []
+                for c2 in class_list:
+                    if c1 == c2: continue
+                    base_name2 = re.sub(r'_\d+$', '', c2.id)
+                    
+                    if base_name1 == base_name2: continue # Must be a different class
+                    
+                    # c2 follows c1: c2.start - c1.end >= 0 AND <= max_gap
+                    b_c2_after_c1 = self.model.NewBoolVar(f'adj_after_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] >= 0).OnlyEnforceIf(b_c2_after_c1)
+                    self.model.Add(self.class_vars[c2.id]['start'] - self.class_vars[c1.id]['end'] <= max_gap).OnlyEnforceIf(b_c2_after_c1)
+                    
+                    # c2 precedes c1: c1.start - c2.end >= 0 AND <= max_gap
+                    b_c2_before_c1 = self.model.NewBoolVar(f'adj_before_{c1.id}_{c2.id}')
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] >= 0).OnlyEnforceIf(b_c2_before_c1)
+                    self.model.Add(self.class_vars[c1.id]['start'] - self.class_vars[c2.id]['end'] <= max_gap).OnlyEnforceIf(b_c2_before_c1)
+                    
+                    adjacent_vars.append(b_c2_after_c1)
+                    adjacent_vars.append(b_c2_before_c1)
+                
+                if adjacent_vars:
+                    # Require at least one adjacent connection for this class session
+                    self.model.AddBoolOr(adjacent_vars)
 
     def _penalize_teacher_class_monopoly(self, weight, threshold_sessions):
         """Soft Constraint: Penalize if a single teacher is scheduled for multiple sessions of the same class."""
