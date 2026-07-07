@@ -208,13 +208,10 @@ class StudioSchedulerModel:
                             self.model.Add(day_idx_var == d_idx).OnlyEnforceIf(is_on_day)
                             self.model.Add(day_idx_var != d_idx).OnlyEnforceIf(is_on_day.Not())
                             
-                            enforce_time = self.model.NewBoolVar(f'enforce_time_{c.id}_{t.id}_{d_idx}')
-                            self.model.AddBoolAnd([presence, is_on_day]).OnlyEnforceIf(enforce_time)
-                            
                             if start_epoch is not None:
-                                self.model.Add(epoch_in_day >= start_epoch).OnlyEnforceIf(enforce_time)
+                                self.model.Add(epoch_in_day >= start_epoch).OnlyEnforceIf([presence, is_on_day])
                             if end_epoch is not None:
-                                self.model.Add(epoch_in_day + c.duration_epochs <= end_epoch).OnlyEnforceIf(enforce_time)
+                                self.model.Add(epoch_in_day + c.duration_epochs <= end_epoch).OnlyEnforceIf([presence, is_on_day])
                 
         # NoOverlap for Rooms
         for r_id, intervals in self.room_intervals.items():
