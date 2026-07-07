@@ -74,7 +74,6 @@
   teachers:
     - Courteney
     - HailleBell
-    - Cameron
 
 - type: hiphop
   cohort: "6-8"
@@ -82,7 +81,6 @@
     - HailleBell
     - HayleyTipton
     - EmilyJ
-    - Cameron
 
 - type: hiphop
   cohort: "9-12"
@@ -91,7 +89,6 @@
     - EmilyJ
     - Courteney
     - Morganne
-    - Cameron
 
 - type: jazz
   cohort: "12+"
@@ -167,7 +164,6 @@
     - Stephanie
     - Lauren
     - JessicaF
-    - Cameron
 
 - type:
     - tinydancers
@@ -221,7 +217,6 @@
     - Stephanie
     - Lauren
     - JessicaF
-    - Cameron
 
 - type: conditioning
   cohort: all

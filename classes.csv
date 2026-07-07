@@ -54,9 +54,9 @@ tiny_tots_7,tinytots,"""2""",2,3,30,10,,,,,04:00:00 PM,06:00:00 PM
 tippy_toes,tippytoes,"""5-7""",4,6,60,10,,,,,03:30:00 PM,07:00:00 PM
 tiny_tumblers,acro,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:00:00 PM
 first_steps,littles,"""baby""",1,2,30,20,,,,WED,04:00:00 PM,05:30:00 PM
-strength_flex,conditioning,,12,18,50,20,,,,,04:00:00 PM,09:00:00 PM
+stretch_strength_3,conditioning,,12,18,50,20,,,,,04:00:00 PM,09:00:00 PM
 ballet_adv_senior,ballet,,16,18,90,20,Qs,Monday-16:00,1,,,
-stretch_strength_b,conditioning,,,,55,20,Kristian,Monday-17:35,1,,,
+stretch_strength_2,conditioning,,,,55,20,Kristian,Monday-17:35,1,,,
 jazz_adv_senior,jazz,,16,18,90,20,Cameron,Monday-18:30,1,,,
 ballet_teal,ballet,,8,11,80,20,Braly,Tuesday-16:30,1,,,
 ballet_purple,ballet,,12,15,90,20,Braly,Tuesday-19:15,1,,,
@@ -70,7 +70,7 @@ tap_adv_junior,tap,,10,12,55,20,Ben,Wednesday-19:40,1,,,
 tap_adv_teen_senior,tap,,13,18,60,20,Ben,Thursday-16:00,1,,,
 hiphop_adv_mini,hiphop,,8,10,60,20,Ben,Thursday-17:00,1,,,
 tap_adv_mini,tap,,8,10,60,20,Ben,Thursday-18:00,1,,,
-stretch_strength_a,conditioning,,,,45,20,Kristian/Cameron,Thursday-19:00,1,,,
+stretch_strength_1,conditioning,,,,45,20,Kristian/Cameron,Thursday-19:00,1,,,
 jazz_adv_mini,jazz,,8,10,85,20,EmilyJ,Monday-17:00,2,,,
 ballet_adv_mini,ballet,,8,10,85,20,Amanda,Monday-18:25,2,,,
 pre_pointe,pointe,,,,60,20,Meredith,Tuesday-16:50,2,,,
