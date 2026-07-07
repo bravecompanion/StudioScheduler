@@ -158,3 +158,21 @@ def export_to_json(results, json_path="schedule.json"):
     with open(json_path, 'w') as out_f:
         json.dump(payload, out_f, indent=2)
     print(f"Generated JSON schedule at {json_path}")
+
+    # Generate Standalone HTML Viewer
+    try:
+        with open("index.html", "r") as f:
+            html_content = f.read()
+        
+        # Replace fetch with embedded JSON
+        embedded_json = json.dumps(payload)
+        fetch_str = "const response = await fetch('schedule.json');\n      const data = await response.json();"
+        replace_str = f"const data = {embedded_json};"
+        
+        standalone_html = html_content.replace(fetch_str, replace_str)
+        
+        with open("standalone_viewer.html", "w") as f:
+            f.write(standalone_html)
+        print("Generated standalone HTML viewer at standalone_viewer.html")
+    except Exception as e:
+        print(f"Could not generate standalone_viewer.html: {e}")
