@@ -8,8 +8,8 @@ ballet_6to8_3,ballet,"""6-8""",6,8,60,20,,,,,03:30:00 PM,07:30:00 PM
 bitty_boppers_1,bittyboppers,"""5-7""",5,6,60,12,,,,,03:30:00 PM,07:00:00 PM
 bitty_boppers_2,bittyboppers,"""5-7""",5,6,60,12,,,,,03:30:00 PM,07:00:00 PM
 contemporary_12plus,contemporary,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
-contemporary_6to9_1,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
-contemporary_6to9_2,contemporary,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+contemporary_6to9_1,contemporary,"""6-8""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+contemporary_6to9_2,contemporary,"""6-8""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
 contemporary_9to12,contemporary,"""9-12""",9,12,60,20,,,,,04:00:00 PM,08:30:00 PM
 acro,acro,"""9-18""",9,18,75,20,Jordan,Tuesday-16:00,3,,,
 hiphop_12plus,hiphop,"""12+""",12,18,60,20,,,,,04:00:00 PM,08:30:00 PM
@@ -30,7 +30,7 @@ kindergarten_ballet,ballet,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
 kindergarten_jazz_1,jazz,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
 kindergarten_jazz_2,jazz,"""5-7""",5,6,45,20,,,,,03:30:00 PM,07:00:00 PM
 kindergarten_jazz_ballet,jazz,"""5-7""",5,6,60,20,,,,,03:30:00 PM,07:00:00 PM
-tap_6to9,tap,"""6-9""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
+tap_6to9,tap,"""6-8""",6,9,60,20,,,,,03:30:00 PM,07:30:00 PM
 tap_9plus_1,tap,"""9-12""",9,18,60,20,,,,,04:00:00 PM,08:30:00 PM
 tap_9plus_2,tap,"""9-12""",9,18,60,20,,,,,04:00:00 PM,08:30:00 PM
 tiny_dancers_1,tinydancers,"""3-4""",3,4,45,10,,,,,04:00:00 PM,06:30:00 PM
